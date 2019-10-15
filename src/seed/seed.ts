@@ -54,12 +54,8 @@ export class Seed {
       return team;
     });
 
-    console.log('did teams');
-
     await mapParallel(teams, async team => {
       return await mapParallel(range(0, 11), async index => {
-        console.log('did player', index);
-
         const player = new Player();
         player.dob = faker.date.between('1997-01-01', '2001-12-31');
         player.height = 164 + Math.round(Math.random() * 28);
@@ -99,27 +95,17 @@ export class Seed {
       return game;
     });
 
-    console.log('did games');
-
     const games = await this.gameRepository.find({
-      relations: [
-        // 'homeTeam',
-        // 'homeTeam.players',
-        // 'awayTeam',
-        // 'awayTeam.players',
-      ],
+      relations: [],
     });
 
     const shotType = new ShotType();
-    shotType.name = 'Stift';
+    shotType.name = 'Chip';
     await this.shotTypeRepository.save(shotType);
 
     const seedShots = (game: Game, team: Team) => {
-      console.log('game shots');
-
       return mapParallel(team.players, async player => {
         const shot = new Shot();
-        console.log('shot');
         const onTarget = chance(0.7);
 
         shot.player = player;
