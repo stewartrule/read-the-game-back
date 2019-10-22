@@ -8,6 +8,7 @@ import {
 import { Game } from '../game/game.entity';
 import { Player } from '../player/player.entity';
 import { ShotType } from '../shot-type/shot-type.entity';
+import { Team } from '../team/team.entity';
 
 import { Field, ID, ObjectType, Int } from 'type-graphql';
 
@@ -41,17 +42,39 @@ export class Shot {
   })
   type!: ShotType;
 
+  @Field(type => Int)
+  @Column({ unsigned: true })
+  typeId!: number;
+
   @Field(type => Game)
   @ManyToOne(type => Game, game => game.shots, {
     nullable: false,
   })
   game!: Game;
 
+  @Field(type => Int)
+  @Column({ unsigned: true })
+  gameId!: number;
+
   @Field(type => Player)
   @ManyToOne(type => Player, player => player.shots, {
     nullable: false,
   })
-  player!: Player;
+  player!: Promise<Player>;
+
+  @Field(type => Int)
+  @Column({ unsigned: true })
+  playerId!: number;
+
+  @Field(type => Team)
+  @ManyToOne(type => Team, team => team.shots, {
+    nullable: false,
+  })
+  team!: Promise<Team>;
+
+  @Field(type => Int)
+  @Column({ unsigned: true })
+  teamId!: number;
 
   @Field(type => Int)
   @Column({ unsigned: true, type: 'tinyint' })

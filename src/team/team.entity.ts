@@ -1,4 +1,4 @@
-import { Field, ID, ObjectType } from 'type-graphql';
+import { Field, ID, ObjectType, Int } from 'type-graphql';
 import {
   Column,
   Entity,
@@ -8,11 +8,13 @@ import {
 
 import { Game } from '../game/game.entity';
 import { Player } from '../player/player.entity';
+import { Shot } from '../shot/shot.entity';
+import { Pass } from '../pass/pass.entity';
 
 @Entity()
 @ObjectType()
 export class Team {
-  @Field(type => ID)
+  @Field(type => Int)
   @PrimaryGeneratedColumn({ unsigned: true })
   id!: number;
 
@@ -38,4 +40,16 @@ export class Team {
     eager: true,
   })
   players!: Player[];
+
+  @Field(type => [Shot])
+  @OneToMany(type => Shot, shot => shot.team, {
+    cascade: true,
+  })
+  shots!: Promise<Shot[]>;
+
+  @Field(type => [Pass])
+  @OneToMany(type => Pass, pass => pass.team, {
+    cascade: true,
+  })
+  passes!: Promise<Pass[]>;
 }
