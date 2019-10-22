@@ -45,3 +45,7 @@ export const random = <T>(values: T[]): Maybe<T> => {
     ? values[Math.floor(Math.random() * length)]
     : undefined;
 };
+
+const MINUTE = 1000 * 60;
+export const minutes = (amount: number) =>
+  Math.round(Math.random() * (MINUTE * amount));
