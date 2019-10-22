@@ -16,6 +16,11 @@ export class TeamResolver {
     return this.teamService.find(filter);
   }
 
+  @Query(() => [Team])
+  teamActivity(@Args() filter: TeamFilter): Promise<Team[]> {
+    return this.teamService.find(filter);
+  }
+
   @FieldResolver(returns => [Game])
   async awayGames(@Root() team: Team) {
     return await team.awayGames;

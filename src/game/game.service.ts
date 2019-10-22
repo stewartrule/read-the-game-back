@@ -18,4 +18,14 @@ export class GameService {
       skip,
     });
   }
+
+  findOne(game: Game): Promise<Game | undefined> {
+    return this.gameRepository.findOne(game, {
+      relations: [
+        'awayTeam',
+        'shots.team',
+        'homeTeam',
+      ],
+    });
+  }
 }
