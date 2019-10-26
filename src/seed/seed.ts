@@ -91,10 +91,15 @@ export class Seed {
       start.setDate(start.getDate() + index);
       start.setHours(20, 0, 0, 0);
 
+      const stop = new Date();
+      stop.setDate(stop.getDate() + index);
+      stop.setHours(20, 45, 0, 0);
+
       const homeTeam = teams[index];
       const game = new Game();
       game.name = `${homeTeam.abbr} - ${awayTeam.abbr}`;
       game.start = start;
+      game.stop = stop;
 
       game.awayTeam = awayTeam;
       game.homeTeam = homeTeam;
@@ -113,24 +118,27 @@ export class Seed {
 
     const seedShots = (game: Game, team: Team) => {
       return mapParallel(team.players, async player => {
-        return mapParallel(range(0, 20), async index => {
-          const shot = new Shot();
+        return mapParallel(
+          range(0, Math.round(Math.random() * 7)),
+          async index => {
+            const shot = new Shot();
 
-          shot.game = game;
-          shot.team = Promise.resolve(team);
-          shot.player = Promise.resolve(player);
-          shot.type = shotType;
+            shot.game = game;
+            shot.team = Promise.resolve(team);
+            shot.player = Promise.resolve(player);
+            shot.type = shotType;
 
-          shot.time = new Date(game.start.valueOf() + minutes(45));
+            shot.time = new Date(game.start.valueOf() + minutes(45));
 
-          const onTarget = chance(0.7);
-          shot.onTarget = onTarget;
-          shot.hit = onTarget ? chance(0.5) : false;
-          shot.out = onTarget ? false : chance(0.5);
-          shot.x = Math.floor(Math.random() * 120);
-          shot.y = Math.floor(Math.random() * 90);
-          return this.shotRepository.save(shot);
-        });
+            const onTarget = chance(0.2);
+            shot.onTarget = onTarget;
+            shot.hit = onTarget ? chance(0.5) : false;
+            shot.out = onTarget ? false : chance(0.5);
+            shot.x = Math.floor(Math.random() * 120);
+            shot.y = Math.floor(Math.random() * 90);
+            return this.shotRepository.save(shot);
+          },
+        );
       });
     };
 
@@ -140,20 +148,23 @@ export class Seed {
 
     const seedPasses = (game: Game, team: Team) => {
       return mapParallel(team.players, async player => {
-        return mapParallel(range(0, 10), async index => {
-          const pass = new Pass();
+        return mapParallel(
+          range(0, Math.round(Math.random() * 7)),
+          async index => {
+            const pass = new Pass();
 
-          pass.player = player;
-          pass.game = game;
-          pass.team = team;
-          pass.type = passType;
+            pass.player = player;
+            pass.game = game;
+            pass.team = team;
+            pass.type = passType;
 
-          pass.time = new Date(game.start.valueOf() + minutes(45));
+            pass.time = new Date(game.start.valueOf() + minutes(45));
 
-          pass.x = Math.floor(Math.random() * 120);
-          pass.y = Math.floor(Math.random() * 90);
-          return this.passRepository.save(pass);
-        });
+            pass.x = Math.floor(Math.random() * 120);
+            pass.y = Math.floor(Math.random() * 90);
+            return this.passRepository.save(pass);
+          },
+        );
       });
     };
 

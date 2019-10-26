@@ -1,4 +1,4 @@
-import { Field, ID, ObjectType, Int } from 'type-graphql';
+import { Field, ID, ObjectType } from 'type-graphql';
 import {
   Column,
   Entity,
@@ -14,7 +14,7 @@ import { Pass } from '../pass/pass.entity';
 @Entity()
 @ObjectType()
 export class Team {
-  @Field(type => Int)
+  @Field(type => ID)
   @PrimaryGeneratedColumn({ unsigned: true })
   id!: number;
 

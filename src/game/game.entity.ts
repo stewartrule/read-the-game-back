@@ -27,6 +27,10 @@ export class Game {
   @Column()
   start!: Date;
 
+  @Field()
+  @Column()
+  stop!: Date;
+
   @Field(type => Team)
   @ManyToOne(type => Team, team => team.homeGames, {
     nullable: false,
