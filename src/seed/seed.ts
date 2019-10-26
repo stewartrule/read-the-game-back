@@ -8,7 +8,9 @@ import { Player } from '../player/player.entity';
 import { Shot } from '../shot/shot.entity';
 import { ShotType } from '../shot-type/shot-type.entity';
 import { Team } from '../team/team.entity';
-import { mapParallel, mapSeq, range, chance } from './util';
+import { Pass } from '../pass/pass.entity';
+import { PassType } from '../pass-type/pass-type.entity';
+import { mapParallel, mapSeq, range, chance, minutes } from './util';
 
 @Injectable()
 export class Seed {
@@ -18,6 +20,12 @@ export class Seed {
 
     @InjectRepository(Player)
     private readonly playerRepository: Repository<Player>,
+
+    @InjectRepository(Pass)
+    private readonly passRepository: Repository<Pass>,
+
+    @InjectRepository(PassType)
+    private readonly passTypeRepository: Repository<PassType>,
 
     @InjectRepository(Shot)
     private readonly shotRepository: Repository<Shot>,
@@ -83,10 +91,15 @@ export class Seed {
       start.setDate(start.getDate() + index);
       start.setHours(20, 0, 0, 0);
 
+      const stop = new Date();
+      stop.setDate(stop.getDate() + index);
+      stop.setHours(20, 45, 0, 0);
+
       const homeTeam = teams[index];
       const game = new Game();
       game.name = `${homeTeam.abbr} - ${awayTeam.abbr}`;
       game.start = start;
+      game.stop = stop;
 
       game.awayTeam = awayTeam;
       game.homeTeam = homeTeam;
@@ -105,29 +118,64 @@ export class Seed {
 
     const seedShots = (game: Game, team: Team) => {
       return mapParallel(team.players, async player => {
-        const shot = new Shot();
-        const onTarget = chance(0.7);
+        return mapParallel(
+          range(0, Math.round(Math.random() * 7)),
+          async index => {
+            const shot = new Shot();
 
-        shot.player = player;
-        shot.game = game;
-        shot.time = game.start;
-        shot.onTarget = onTarget;
-        shot.type = shotType;
+            shot.game = game;
+            shot.team = Promise.resolve(team);
+            shot.player = Promise.resolve(player);
+            shot.type = shotType;
 
-        shot.hit = onTarget ? chance(0.5) : false;
-        shot.out = onTarget ? false : chance(0.5);
-        shot.x = Math.floor(Math.random() * 120);
-        shot.y = Math.floor(Math.random() * 90);
-        return this.shotRepository.save(shot);
+            shot.time = new Date(game.start.valueOf() + minutes(45));
+
+            const onTarget = chance(0.2);
+            shot.onTarget = onTarget;
+            shot.hit = onTarget ? chance(0.5) : false;
+            shot.out = onTarget ? false : chance(0.5);
+            shot.x = Math.floor(Math.random() * 120);
+            shot.y = Math.floor(Math.random() * 90);
+            return this.shotRepository.save(shot);
+          },
+        );
+      });
+    };
+
+    const passType = new PassType();
+    passType.name = 'Long';
+    await this.passTypeRepository.save(passType);
+
+    const seedPasses = (game: Game, team: Team) => {
+      return mapParallel(team.players, async player => {
+        return mapParallel(
+          range(0, Math.round(Math.random() * 7)),
+          async index => {
+            const pass = new Pass();
+
+            pass.player = player;
+            pass.game = game;
+            pass.team = team;
+            pass.type = passType;
+
+            pass.time = new Date(game.start.valueOf() + minutes(45));
+
+            pass.x = Math.floor(Math.random() * 120);
+            pass.y = Math.floor(Math.random() * 90);
+            return this.passRepository.save(pass);
+          },
+        );
       });
     };
 
     await mapParallel(games, async game => {
       await seedShots(game, game.homeTeam);
+      await seedPasses(game, game.homeTeam);
     });
 
     await mapParallel(games, async game => {
       await seedShots(game, game.awayTeam);
+      await seedPasses(game, game.awayTeam);
     });
   }
 }

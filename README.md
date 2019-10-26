@@ -4,7 +4,7 @@
 
 GraphQL service for Read the Game Front
 
-Found [this design](https://www.behance.net/gallery/55747919/read-the-gamecom) made by [Bureau Oberhaeuser](https://oberhaeuser.info/) on Behance, and thought it looked pretty awesome, so I decided to build a component library to try out [storybook](https://github.com/storybookjs/storybook), and also give [NestJS](https://docs.nestjs.com) a try for the backend.
+Found [this design](https://www.behance.net/gallery/55747919/read-the-gamecom) made by [Bureau Oberhaeuser](https://oberhaeuser.info/) on Behance, which I thought had some pretty awesome components, so I decided to try out [storybook](https://github.com/storybookjs/storybook) to build up the [frontend](https://github.com/stewartrule/read-the-game-front), and also give [TypeGraphQL](https://typegraphql.ml/) and [TypeORM](https://typeorm.io/) a try for the GraphQL backend.
 
 
 ### Installation
@@ -15,33 +15,16 @@ $ yarn
 
 ### Running the app
 
-```bash
-# development
-$ yarn start
-
-# watch mode
-$ yarn start:dev
-
-# production mode
-$ yarn start:prod
-```
-
-### Seed
+First run the seed
 
 ```bash
 # seed
 $ yarn seed
 ```
 
-### Test
+Then run the server
 
 ```bash
-# unit tests
-$ yarn test
-
-# e2e tests
-$ yarn test:e2e
-
-# test coverage
-$ yarn test:cov
+# watch mode
+$ yarn start:dev
 ```
