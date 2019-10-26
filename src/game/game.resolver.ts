@@ -1,5 +1,5 @@
 import { Args, Query, Resolver } from '@nestjs/graphql';
-import { FieldResolver, Root } from 'type-graphql';
+import { FieldResolver, Root, ResolverInterface } from 'type-graphql';
 
 import { Intercept } from '../intercept/intercept.entity';
 import { Pass } from '../pass/pass.entity';
@@ -19,7 +19,7 @@ import {
 } from './object-type/area-action-count';
 
 @Resolver(() => Game)
-export class GameResolver {
+export class GameResolver implements ResolverInterface<Game> {
   constructor(private readonly gameService: GameService) {}
 
   @Query(() => [Game])
@@ -40,6 +40,20 @@ export class GameResolver {
   @FieldResolver(returns => [Pass])
   async passes(@Root() game: Game) {
     return await game.passes;
+  }
+
+  @FieldResolver(returns => [Shot])
+  async homeTeamShots(@Root() game: Game) {
+    const shots = await game.shots;
+
+    return shots.filter(shot => shot.teamId === game.homeTeam.id);
+  }
+
+  @FieldResolver(returns => [Shot])
+  async awayTeamShots(@Root() game: Game) {
+    const shots = await game.shots;
+
+    return shots.filter(shot => shot.teamId === game.awayTeam.id);
   }
 
   @FieldResolver(returns => AreaActionCount)
@@ -78,8 +92,11 @@ export class GameResolver {
   }
 
   @FieldResolver(returns => ShotCountByPeriod)
-  async shotCountByPeriod(@Root() game: Game) {
+  async shotCountByPeriod(
+    @Root() game: Game,
+  ): Promise<ShotCountByPeriod> {
     const shots = await game.shots;
+
     const home = shots.filter(
       ({ teamId }) => teamId === game.homeTeam.id,
     );
