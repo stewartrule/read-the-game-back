@@ -5,20 +5,16 @@ import { Connection } from 'typeorm';
 
 import entities from '../app.entities';
 import modules from '../app.modules';
+import config from '../config/db';
 import { Seed } from './seed';
 
 @Module({
   imports: [
     TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: 'localhost',
-      port: 8889,
-      username: 'root',
-      password: 'root',
-      database: 'game',
-      entities: [...entities],
+      ...config,
+      entities,
       synchronize: true,
-      dropSchema: true
+      dropSchema: true,
     }),
     ...modules,
     GraphQLModule.forRoot({

@@ -1,6 +1,6 @@
 import { Args, Query, Resolver } from '@nestjs/graphql';
 
-import { FieldResolver, Root } from 'type-graphql';
+import { FieldResolver, Root, Int } from 'type-graphql';
 
 import { TeamFilter } from './dto/team.filter';
 import { Game } from '../game/game.entity';

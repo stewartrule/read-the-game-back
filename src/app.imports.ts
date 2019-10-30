@@ -3,16 +3,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import entities from './app.entities';
 import modules from './app.modules';
+import config from './config/db';
 
 export default [
   TypeOrmModule.forRoot({
-    type: 'mysql',
-    host: 'localhost',
-    port: 8889,
-    username: 'root',
-    password: 'root',
-    database: 'game',
-    entities: [...entities],
+    ...config,
+    entities,
     synchronize: true,
   }),
   ...modules,
