@@ -26,5 +26,5 @@ Then run the server
 
 ```bash
 # watch mode
-$ yarn start:dev
+$ yarn start
 ```

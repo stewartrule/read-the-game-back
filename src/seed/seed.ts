@@ -1,19 +1,18 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import * as faker from 'faker/locale/de';
+import * as faker from 'faker';
+import { Service } from 'typedi';
 import { Repository } from 'typeorm';
-
+import { InjectRepository } from 'typeorm-typedi-extensions';
 import { Game } from '../game/game.entity';
-import { Player } from '../player/player.entity';
-import { Shot } from '../shot/shot.entity';
-import { ShotType } from '../shot-type/shot-type.entity';
-import { Team } from '../team/team.entity';
 import { Intercept } from '../intercept/intercept.entity';
-import { Pass } from '../pass/pass.entity';
 import { PassType } from '../pass-type/pass-type.entity';
-import { mapParallel, mapSeq, range, chance, minutes } from './util';
+import { Pass } from '../pass/pass.entity';
+import { Player } from '../player/player.entity';
+import { ShotType } from '../shot-type/shot-type.entity';
+import { Shot } from '../shot/shot.entity';
+import { Team } from '../team/team.entity';
+import { chance, mapParallel, mapSeq, minutes, range } from './util';
 
-@Injectable()
+@Service()
 export class Seed {
   constructor(
     @InjectRepository(Game)

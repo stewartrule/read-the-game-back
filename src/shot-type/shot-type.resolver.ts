@@ -1,5 +1,5 @@
-import { Query, Resolver } from '@nestjs/graphql';
-
+import 'reflect-metadata';
+import { Query, Resolver } from 'type-graphql';
 import { ShotType } from './shot-type.entity';
 import { ShotTypeService } from './shot-type.service';
 

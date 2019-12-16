@@ -6,7 +6,6 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-
 import { Intercept } from '../intercept/intercept.entity';
 import { Pass } from '../pass/pass.entity';
 import { Shot } from '../shot/shot.entity';

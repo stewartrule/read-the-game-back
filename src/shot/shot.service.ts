@@ -1,7 +1,6 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { Service } from 'typedi';
 import { Repository } from 'typeorm';
-
+import { InjectRepository } from 'typeorm-typedi-extensions';
 import { Shot } from './shot.entity';
 
 type CreateShot = {
@@ -12,7 +11,7 @@ type CreateShot = {
   hit: boolean;
 };
 
-@Injectable()
+@Service()
 export class ShotService {
   constructor(
     @InjectRepository(Shot)
@@ -24,7 +23,7 @@ export class ShotService {
     playerId,
     teamId,
     shotTypeId,
-    hit
+    hit,
   }: CreateShot): Promise<Shot> {
     const shot = new Shot();
 

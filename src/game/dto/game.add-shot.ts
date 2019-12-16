@@ -1,6 +1,5 @@
 import { IsBoolean, Min } from 'class-validator';
 import { Field, InputType, Int } from 'type-graphql';
-
 import { Shot } from '../../shot/shot.entity';
 
 @InputType()

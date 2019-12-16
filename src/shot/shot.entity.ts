@@ -1,16 +1,14 @@
+import { Field, ID, Int, ObjectType } from 'type-graphql';
 import {
   Column,
   Entity,
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-
 import { Game } from '../game/game.entity';
 import { Player } from '../player/player.entity';
 import { ShotType } from '../shot-type/shot-type.entity';
 import { Team } from '../team/team.entity';
-
-import { Field, ID, ObjectType, Int } from 'type-graphql';
 
 @Entity({ orderBy: { time: 'ASC' } })
 @ObjectType()

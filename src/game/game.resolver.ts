@@ -1,42 +1,40 @@
+import 'reflect-metadata';
 import {
+  Arg,
   Args,
-  Subscription,
+  FieldResolver,
+  Mutation,
+  Publisher,
+  PubSub,
   Query,
   Resolver,
-  Mutation,
-  // Root,
-} from '@nestjs/graphql';
-
-import { FieldResolver, Root } from 'type-graphql';
-
+  Root,
+  Subscription,
+} from 'type-graphql';
 import { Intercept } from '../intercept/intercept.entity';
 import { Pass } from '../pass/pass.entity';
 import { Shot } from '../shot/shot.entity';
-import { Team } from '../team/team.entity';
 import { ShotService } from '../shot/shot.service';
-import { GameFilter } from './dto/game.filter';
+import { Team } from '../team/team.entity';
 import { AddShotInput } from './dto/game.add-shot';
+import { GameFilter } from './dto/game.filter';
 import { Game } from './game.entity';
 import { GameService } from './game.service';
+import {
+  AreaActionCount,
+  getAreaActionCountByTeam,
+  PlayerAction,
+} from './object-type/area-action-count';
+import {
+  getShotCountByPeriod,
+  ShotCountByPeriod,
+} from './object-type/shot-count-by-period';
 
-import { PubSub } from 'graphql-subscriptions';
-
-const pubSub = new PubSub();
-
-enum Channel {
+enum Topics {
   ShotAdded = 'ShotAdded',
 }
 
-import {
-  ShotCountByPeriod,
-  getShotCountByPeriod,
-} from './object-type/shot-count-by-period';
-
-import {
-  PlayerAction,
-  AreaActionCount,
-  getAreaActionCountByTeam,
-} from './object-type/area-action-count';
+type ShotAddedPayload = { shot: Shot; game: Game };
 
 @Resolver(() => Game)
 export class GameResolver {
@@ -51,50 +49,42 @@ export class GameResolver {
   }
 
   @Mutation(returns => Shot)
-  async addShot(@Args('data') shotData: AddShotInput): Promise<Shot> {
+  async addShot(
+    @Arg('data') shotData: AddShotInput,
+    @PubSub(Topics.ShotAdded)
+    publish: Publisher<ShotAddedPayload>,
+  ): Promise<Shot> {
     const shot = await this.shotService.create(shotData);
     const game = await this.gameService.findByShot(shot);
 
     if (game) {
-      await pubSub.publish('ShotAdded', { shotAdded: shot });
-
-      await pubSub.publish('GameUpdated', {
-        gameUpdated: game,
-      });
-
-      await pubSub.publish('ShotCountByPeriodUpdated', {
-        shotCountByPeriodUpdated: game,
-      });
-
-      await pubSub.publish('TeamUpdated', {
-        teamUpdated:
-          game.awayTeam.id === shot.teamId
-            ? game.awayTeam
-            : game.homeTeam,
-      });
+      publish({ game, shot });
     }
 
     return shot;
   }
 
-  @Subscription(returns => Game)
-  gameUpdated() {
-    return pubSub.asyncIterator('GameUpdated');
+  @Subscription(returns => Game, {
+    topics: [Topics.ShotAdded],
+  })
+  gameUpdated(@Root() { game }: ShotAddedPayload): Game {
+    return game;
   }
 
-  @Subscription(returns => Shot)
-  shotAdded() {
-    return pubSub.asyncIterator('ShotAdded');
+  @Subscription(returns => Shot, {
+    topics: [Topics.ShotAdded],
+  })
+  shotAdded(@Root() { shot }: ShotAddedPayload): Shot {
+    return shot;
   }
 
-  @Subscription(returns => Team)
-  teamUpdated() {
-    return pubSub.asyncIterator('TeamUpdated');
-  }
-
-  @Subscription(returns => Game)
-  shotCountByPeriodUpdated() {
-    return pubSub.asyncIterator('ShotCountByPeriodUpdated');
+  @Subscription(returns => Team, {
+    topics: [Topics.ShotAdded],
+  })
+  teamUpdated(@Root() { game, shot }: ShotAddedPayload): Team {
+    return game.awayTeam.id === shot.teamId
+      ? game.awayTeam
+      : game.homeTeam;
   }
 
   @FieldResolver(returns => [Shot])

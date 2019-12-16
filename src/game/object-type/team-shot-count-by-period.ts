@@ -1,5 +1,4 @@
 import { Field, Int, ObjectType } from 'type-graphql';
-
 import { Shot } from '../../shot/shot.entity';
 
 @ObjectType()

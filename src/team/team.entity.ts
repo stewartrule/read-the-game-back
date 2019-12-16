@@ -1,12 +1,10 @@
-import { Field, ID, ObjectType, Int } from 'type-graphql';
+import { Field, ID, ObjectType } from 'type-graphql';
 import {
   Column,
   Entity,
   OneToMany,
   PrimaryGeneratedColumn,
-  RelationCount
 } from 'typeorm';
-
 import { Game } from '../game/game.entity';
 import { Intercept } from '../intercept/intercept.entity';
 import { Pass } from '../pass/pass.entity';

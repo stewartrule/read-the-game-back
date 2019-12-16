@@ -1,11 +1,12 @@
-import { Args, Query, Resolver } from '@nestjs/graphql';
+import 'reflect-metadata';
 import {
   FieldResolver,
-  Root,
-  ResolverInterface,
   Int,
+  Query,
+  Resolver,
+  ResolverInterface,
+  Root,
 } from 'type-graphql';
-
 import { Shot } from '../shot/shot.entity';
 import { Player } from './player.entity';
 import { PlayerService } from './player.service';

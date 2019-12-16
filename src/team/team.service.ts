@@ -1,11 +1,10 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { Service } from 'typedi';
 import { Repository } from 'typeorm';
-
+import { InjectRepository } from 'typeorm-typedi-extensions';
 import { TeamFilter } from './dto/team.filter';
 import { Team } from './team.entity';
 
-@Injectable()
+@Service()
 export class TeamService {
   constructor(
     @InjectRepository(Team)

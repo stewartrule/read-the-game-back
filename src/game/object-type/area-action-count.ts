@@ -1,5 +1,4 @@
 import { Field, ObjectType } from 'type-graphql';
-
 import { Team } from '../../team/team.entity';
 import { ActionCount } from './action-count';
 

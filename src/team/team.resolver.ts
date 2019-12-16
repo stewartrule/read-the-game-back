@@ -1,15 +1,16 @@
-import { Args, Query, Resolver, Subscription } from '@nestjs/graphql';
-
-import { FieldResolver, Root, Int } from 'type-graphql';
-
-import { TeamFilter } from './dto/team.filter';
+import 'reflect-metadata';
+import {
+  Args,
+  FieldResolver,
+  Int,
+  Query,
+  Resolver,
+  Root,
+} from 'type-graphql';
 import { Game } from '../game/game.entity';
+import { TeamFilter } from './dto/team.filter';
 import { Team } from './team.entity';
 import { TeamService } from './team.service';
-
-import { PubSub } from 'graphql-subscriptions';
-
-const pubSub = new PubSub();
 
 @Resolver(() => Team)
 export class TeamResolver {

@@ -1,12 +1,11 @@
+import { Field, ID, ObjectType } from 'type-graphql';
 import {
   Column,
   Entity,
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-
 import { Pass } from '../pass/pass.entity';
-import { Field, ID, ObjectType } from 'type-graphql';
 
 @Entity()
 @ObjectType()

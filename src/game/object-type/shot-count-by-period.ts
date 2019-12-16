@@ -1,5 +1,4 @@
 import { Field, ObjectType } from 'type-graphql';
-
 import { Game } from '../../game/game.entity';
 import { Shot } from '../../shot/shot.entity';
 import { TeamShotCountByPeriod } from './team-shot-count-by-period';

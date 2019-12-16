@@ -5,7 +5,6 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-
 import { Game } from '../game/game.entity';
 import { Player } from '../player/player.entity';
 import { Team } from '../team/team.entity';

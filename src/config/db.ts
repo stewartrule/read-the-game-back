@@ -1,6 +1,6 @@
-import { TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { ConnectionOptions } from 'typeorm';
 
-const config: TypeOrmModuleOptions = {
+const config: ConnectionOptions = {
   type: 'mysql',
   host: 'localhost',
   port: 8889,
