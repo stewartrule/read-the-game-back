@@ -3,7 +3,7 @@ import { Field, ObjectType } from 'type-graphql';
 import { Team } from '../../team/team.entity';
 import { ActionCount } from './action-count';
 
-type Action = {
+export type PlayerAction = {
   x: number;
   y: number;
   teamId: number;
@@ -31,7 +31,7 @@ const AreaX = 120 / 5;
 const AreaY = 90 / 3;
 
 export const getAreaActionCountByTeam = (
-  actions: Action[],
+  actions: PlayerAction[],
   team: Team,
 ): TeamActionCount =>
   actions

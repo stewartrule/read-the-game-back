@@ -1,12 +1,31 @@
-import { Args, Query, Resolver } from '@nestjs/graphql';
-import { FieldResolver, Root, ResolverInterface } from 'type-graphql';
+import {
+  Args,
+  Subscription,
+  Query,
+  Resolver,
+  Mutation,
+  // Root,
+} from '@nestjs/graphql';
+
+import { FieldResolver, Root } from 'type-graphql';
 
 import { Intercept } from '../intercept/intercept.entity';
 import { Pass } from '../pass/pass.entity';
 import { Shot } from '../shot/shot.entity';
+import { Team } from '../team/team.entity';
+import { ShotService } from '../shot/shot.service';
 import { GameFilter } from './dto/game.filter';
+import { AddShotInput } from './dto/game.add-shot';
 import { Game } from './game.entity';
 import { GameService } from './game.service';
+
+import { PubSub } from 'graphql-subscriptions';
+
+const pubSub = new PubSub();
+
+enum Channel {
+  ShotAdded = 'ShotAdded',
+}
 
 import {
   ShotCountByPeriod,
@@ -14,17 +33,68 @@ import {
 } from './object-type/shot-count-by-period';
 
 import {
+  PlayerAction,
   AreaActionCount,
   getAreaActionCountByTeam,
 } from './object-type/area-action-count';
 
 @Resolver(() => Game)
-export class GameResolver implements ResolverInterface<Game> {
-  constructor(private readonly gameService: GameService) {}
+export class GameResolver {
+  constructor(
+    private readonly gameService: GameService,
+    private readonly shotService: ShotService,
+  ) {}
 
   @Query(() => [Game])
   games(@Args() filter: GameFilter): Promise<Game[]> {
     return this.gameService.find(filter);
+  }
+
+  @Mutation(returns => Shot)
+  async addShot(@Args('data') shotData: AddShotInput): Promise<Shot> {
+    const shot = await this.shotService.create(shotData);
+    const game = await this.gameService.findByShot(shot);
+
+    if (game) {
+      await pubSub.publish('ShotAdded', { shotAdded: shot });
+
+      await pubSub.publish('GameUpdated', {
+        gameUpdated: game,
+      });
+
+      await pubSub.publish('ShotCountByPeriodUpdated', {
+        shotCountByPeriodUpdated: game,
+      });
+
+      await pubSub.publish('TeamUpdated', {
+        teamUpdated:
+          game.awayTeam.id === shot.teamId
+            ? game.awayTeam
+            : game.homeTeam,
+      });
+    }
+
+    return shot;
+  }
+
+  @Subscription(returns => Game)
+  gameUpdated() {
+    return pubSub.asyncIterator('GameUpdated');
+  }
+
+  @Subscription(returns => Shot)
+  shotAdded() {
+    return pubSub.asyncIterator('ShotAdded');
+  }
+
+  @Subscription(returns => Team)
+  teamUpdated() {
+    return pubSub.asyncIterator('TeamUpdated');
+  }
+
+  @Subscription(returns => Game)
+  shotCountByPeriodUpdated() {
+    return pubSub.asyncIterator('ShotCountByPeriodUpdated');
   }
 
   @FieldResolver(returns => [Shot])
@@ -62,10 +132,7 @@ export class GameResolver implements ResolverInterface<Game> {
   ): Promise<AreaActionCount> {
     const shots = await game.shots;
 
-    return {
-      homeTeam: getAreaActionCountByTeam(shots, game.homeTeam),
-      awayTeam: getAreaActionCountByTeam(shots, game.awayTeam),
-    };
+    return this.getGameActionCount(game, shots);
   }
 
   @FieldResolver(returns => AreaActionCount)
@@ -73,10 +140,7 @@ export class GameResolver implements ResolverInterface<Game> {
     const shots = await game.shots;
     const hits = shots.filter(shot => shot.hit);
 
-    return {
-      homeTeam: getAreaActionCountByTeam(hits, game.homeTeam),
-      awayTeam: getAreaActionCountByTeam(hits, game.awayTeam),
-    };
+    return this.getGameActionCount(game, hits);
   }
 
   @FieldResolver(returns => AreaActionCount)
@@ -85,9 +149,13 @@ export class GameResolver implements ResolverInterface<Game> {
   ): Promise<AreaActionCount> {
     const passes = await game.passes;
 
+    return this.getGameActionCount(game, passes);
+  }
+
+  private getGameActionCount(game: Game, actions: PlayerAction[]) {
     return {
-      homeTeam: getAreaActionCountByTeam(passes, game.homeTeam),
-      awayTeam: getAreaActionCountByTeam(passes, game.awayTeam),
+      homeTeam: getAreaActionCountByTeam(actions, game.homeTeam),
+      awayTeam: getAreaActionCountByTeam(actions, game.awayTeam),
     };
   }
 
