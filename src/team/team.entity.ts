@@ -1,15 +1,17 @@
-import { Field, ID, ObjectType } from 'type-graphql';
+import { Field, ID, ObjectType, Int } from 'type-graphql';
 import {
   Column,
   Entity,
   OneToMany,
   PrimaryGeneratedColumn,
+  RelationCount
 } from 'typeorm';
 
 import { Game } from '../game/game.entity';
+import { Intercept } from '../intercept/intercept.entity';
+import { Pass } from '../pass/pass.entity';
 import { Player } from '../player/player.entity';
 import { Shot } from '../shot/shot.entity';
-import { Pass } from '../pass/pass.entity';
 
 @Entity()
 @ObjectType()
@@ -52,4 +54,10 @@ export class Team {
     cascade: true,
   })
   passes!: Promise<Pass[]>;
+
+  @Field(type => [Intercept])
+  @OneToMany(type => Intercept, intercept => intercept.team, {
+    cascade: true,
+  })
+  intercepts!: Promise<Intercept[]>;
 }
