@@ -63,20 +63,51 @@ export class Player {
   dob!: Date;
 
   @Field(type => Team)
-  @ManyToOne(type => Team, team => team.players, {
-    nullable: false,
-  })
+  @ManyToOne(
+    type => Team,
+    team => team.players,
+    {
+      nullable: false,
+    },
+  )
   team!: Team;
 
+  @Field(type => Int)
+  @Column({ unsigned: true })
+  teamId!: number;
+
   @Field(type => [Shot])
-  @OneToMany(type => Shot, shot => shot.player)
+  @OneToMany(
+    type => Shot,
+    shot => shot.player,
+  )
   shots!: Promise<Shot[]>;
 
   @Field(type => [Pass])
-  @OneToMany(type => Pass, pass => pass.player)
+  @OneToMany(
+    type => Pass,
+    pass => pass.fromPlayer,
+  )
   passes!: Pass[];
 
+  @Field(type => [Pass])
+  @OneToMany(
+    type => Pass,
+    pass => pass.toPlayer,
+  )
+  receives!: Pass[];
+
   @Field(type => [Intercept])
-  @OneToMany(type => Intercept, intercept => intercept.player)
+  @OneToMany(
+    type => Intercept,
+    intercept => intercept.toPlayer,
+  )
   intercepts!: Intercept[];
+
+  @Field(type => [Intercept])
+  @OneToMany(
+    type => Intercept,
+    intercept => intercept.fromPlayer,
+  )
+  ballLosses!: Intercept[];
 }

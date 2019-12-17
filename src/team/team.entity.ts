@@ -27,35 +27,67 @@ export class Team {
   abbr!: string;
 
   @Field(type => [Game])
-  @OneToMany(type => Game, game => game.awayTeam)
+  @OneToMany(
+    type => Game,
+    game => game.awayTeam,
+  )
   awayGames!: Promise<Game[]>;
 
   @Field(type => [Game])
-  @OneToMany(type => Game, game => game.homeTeam)
+  @OneToMany(
+    type => Game,
+    game => game.homeTeam,
+  )
   homeGames!: Promise<Game[]>;
 
   @Field(type => [Player])
-  @OneToMany(type => Player, player => player.team, {
-    cascade: true,
-    eager: true,
-  })
+  @OneToMany(
+    type => Player,
+    player => player.team,
+    {
+      cascade: true,
+      eager: true,
+    },
+  )
   players!: Player[];
 
   @Field(type => [Shot])
-  @OneToMany(type => Shot, shot => shot.team, {
-    cascade: true,
-  })
+  @OneToMany(
+    type => Shot,
+    shot => shot.team,
+    {
+      cascade: true,
+    },
+  )
   shots!: Promise<Shot[]>;
 
   @Field(type => [Pass])
-  @OneToMany(type => Pass, pass => pass.team, {
-    cascade: true,
-  })
+  @OneToMany(
+    type => Pass,
+    pass => pass.team,
+    {
+      cascade: true,
+    },
+  )
   passes!: Promise<Pass[]>;
 
   @Field(type => [Intercept])
-  @OneToMany(type => Intercept, intercept => intercept.team, {
-    cascade: true,
-  })
+  @OneToMany(
+    type => Intercept,
+    intercept => intercept.toPlayer,
+    {
+      cascade: true,
+    },
+  )
   intercepts!: Promise<Intercept[]>;
+
+  @Field(type => [Intercept])
+  @OneToMany(
+    type => Intercept,
+    intercept => intercept.fromPlayer,
+    {
+      cascade: true,
+    },
+  )
+  ballLosses!: Promise<Intercept[]>;
 }

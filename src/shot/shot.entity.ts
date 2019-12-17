@@ -34,20 +34,28 @@ export class Shot {
   onTarget!: boolean;
 
   @Field(type => ShotType)
-  @ManyToOne(type => ShotType, shotType => shotType.shots, {
-    nullable: false,
-    eager: true,
-  })
-  type!: ShotType;
+  @ManyToOne(
+    type => ShotType,
+    shotType => shotType.shots,
+    {
+      nullable: false,
+      eager: true,
+    },
+  )
+  shotType!: ShotType;
 
   @Field(type => Int)
   @Column({ unsigned: true })
-  typeId!: number;
+  shotTypeId!: number;
 
   @Field(type => Game)
-  @ManyToOne(type => Game, game => game.shots, {
-    nullable: false,
-  })
+  @ManyToOne(
+    type => Game,
+    game => game.shots,
+    {
+      nullable: false,
+    },
+  )
   game!: Game;
 
   @Field(type => Int)
@@ -55,9 +63,13 @@ export class Shot {
   gameId!: number;
 
   @Field(type => Player)
-  @ManyToOne(type => Player, player => player.shots, {
-    nullable: false,
-  })
+  @ManyToOne(
+    type => Player,
+    player => player.shots,
+    {
+      nullable: false,
+    },
+  )
   player!: Promise<Player>;
 
   @Field(type => Int)
@@ -65,9 +77,13 @@ export class Shot {
   playerId!: number;
 
   @Field(type => Team)
-  @ManyToOne(type => Team, team => team.shots, {
-    nullable: false,
-  })
+  @ManyToOne(
+    type => Team,
+    team => team.shots,
+    {
+      nullable: false,
+    },
+  )
   team!: Promise<Team>;
 
   @Field(type => Int)

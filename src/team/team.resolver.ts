@@ -21,10 +21,10 @@ export class TeamResolver {
     return this.teamService.find(filter);
   }
 
-  @Query(returns => [Team])
-  teamActivity(@Args() filter: TeamFilter): Promise<Team[]> {
-    return this.teamService.find(filter);
-  }
+  // @Query(returns => [Team])
+  // teamActivity(@Args() filter: TeamFilter): Promise<Team[]> {
+  //   return this.teamService.find(filter);
+  // }
 
   @FieldResolver(returns => Int)
   async passCount(@Root() team: Team) {
@@ -44,7 +44,6 @@ export class TeamResolver {
     return shots.filter(({ hit }) => hit).length;
   }
 
-  // @fixme
   @FieldResolver(returns => Int)
   async involvedPlayerCount(@Root() team: Team) {
     const shots = await team.shots;
@@ -57,15 +56,14 @@ export class TeamResolver {
       }).length;
   }
 
-  // @fixme
   @FieldResolver(returns => Int)
   async averageStrength(@Root() { players }: Team) {
-    const sum = players.reduce(
+    const strength = players.reduce(
       (sum, player) => sum + player.strength,
       0,
     );
 
-    return Math.round(sum / players.length);
+    return players.length ? Math.round(strength / players.length) : 0;
   }
 
   @FieldResolver(returns => Int)

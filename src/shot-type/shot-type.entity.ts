@@ -19,6 +19,9 @@ export class ShotType {
   name!: string;
 
   @Field(type => [Shot])
-  @OneToMany(type => Shot, shot => shot.type)
+  @OneToMany(
+    type => Shot,
+    shot => shot.shotType,
+  )
   shots!: Shot[];
 }

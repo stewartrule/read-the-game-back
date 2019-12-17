@@ -1,9 +1,9 @@
 import { IsBoolean, Min } from 'class-validator';
 import { Field, InputType, Int } from 'type-graphql';
-import { Shot } from '../../shot/shot.entity';
+import { Shot } from '../shot.entity';
 
 @InputType()
-export class AddShotInput implements Partial<Shot> {
+export class CreateShotInput implements Partial<Shot> {
   @Field(type => Int)
   @Min(0)
   gameId!: number;

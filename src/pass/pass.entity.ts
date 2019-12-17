@@ -22,13 +22,20 @@ export class Pass {
   time!: Date;
 
   @Field(type => PassType)
-  @ManyToOne(type => PassType, passType => passType.passes, {
-    nullable: false,
-  })
+  @ManyToOne(
+    type => PassType,
+    passType => passType.passes,
+    {
+      nullable: false,
+    },
+  )
   type!: PassType;
 
   @Field(type => Game)
-  @ManyToOne(type => Game, game => game.passes)
+  @ManyToOne(
+    type => Game,
+    game => game.passes,
+  )
   game!: Game;
 
   @Field(type => Int)
@@ -36,7 +43,10 @@ export class Pass {
   gameId!: number;
 
   @Field(type => Team)
-  @ManyToOne(type => Team, team => team.passes)
+  @ManyToOne(
+    type => Team,
+    team => team.passes,
+  )
   team!: Team;
 
   @Field(type => Int)
@@ -44,12 +54,26 @@ export class Pass {
   teamId!: number;
 
   @Field(type => Player)
-  @ManyToOne(type => Player, player => player.passes)
-  player!: Player;
+  @ManyToOne(
+    type => Player,
+    player => player.passes,
+  )
+  fromPlayer!: Player;
 
   @Field(type => Int)
   @Column({ unsigned: true })
-  playerId!: number;
+  fromPlayerId!: number;
+
+  @Field(type => Player)
+  @ManyToOne(
+    type => Player,
+    player => player.receives,
+  )
+  toPlayer!: Player;
+
+  @Field(type => Int)
+  @Column({ unsigned: true })
+  toPlayerId!: number;
 
   @Field(type => Int)
   @Column({ unsigned: true, type: 'tinyint' })

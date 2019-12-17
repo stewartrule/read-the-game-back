@@ -13,8 +13,7 @@
     "baseUrl": "./",
     "incremental": true,
     "allowSyntheticDefaultImports": true,
-    "lib": ["es2016", "esnext.asynciterable"],
-    "types": ["node"]
+    "lib": ["es2016", "esnext.asynciterable"]
   },
   "exclude": ["node_modules", "dist"]
 }

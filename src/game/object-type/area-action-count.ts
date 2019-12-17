@@ -35,32 +35,29 @@ export const getAreaActionCountByTeam = (
 ): TeamActionCount =>
   actions
     .filter(({ teamId }) => teamId === team.id)
-    .reduce(
-      (stats, action) => {
-        const x = Math.ceil(action.x / AreaX);
-        const y = Math.ceil(action.y / AreaY);
+    .reduce((stats, action) => {
+      const x = Math.ceil(action.x / AreaX);
+      const y = Math.ceil(action.y / AreaY);
 
-        const index = stats.findIndex(
-          stat => stat.x === x && stat.y === y,
-        );
+      const index = stats.findIndex(
+        stat => stat.x === x && stat.y === y,
+      );
 
-        return index > -1
-          ? replace(stats, index, {
+      return index > -1
+        ? replace(stats, index, {
+            x,
+            y,
+            time: action.time,
+            teamId: action.teamId,
+            count: stats[index].count + 1,
+          })
+        : stats.concat([
+            {
               x,
               y,
               time: action.time,
               teamId: action.teamId,
-              count: stats[index].count + 1,
-            })
-          : stats.concat([
-              {
-                x,
-                y,
-                time: action.time,
-                teamId: action.teamId,
-                count: 1,
-              },
-            ]);
-      },
-      [] as ActionCount[],
-    );
+              count: 1,
+            },
+          ]);
+    }, [] as ActionCount[]);

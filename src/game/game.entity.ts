@@ -31,34 +31,54 @@ export class Game {
   stop!: Date;
 
   @Field(type => Team)
-  @ManyToOne(type => Team, team => team.homeGames, {
-    nullable: false,
-    eager: true,
-  })
+  @ManyToOne(
+    type => Team,
+    team => team.homeGames,
+    {
+      nullable: false,
+      eager: true,
+    },
+  )
   homeTeam!: Team;
 
   @Field(type => Team)
-  @ManyToOne(type => Team, team => team.awayGames, {
-    nullable: false,
-    eager: true,
-  })
+  @ManyToOne(
+    type => Team,
+    team => team.awayGames,
+    {
+      nullable: false,
+      eager: true,
+    },
+  )
   awayTeam!: Team;
 
   @Field(type => [Pass])
-  @OneToMany(type => Pass, pass => pass.game, {
-    onDelete: 'CASCADE',
-  })
+  @OneToMany(
+    type => Pass,
+    pass => pass.game,
+    {
+      onDelete: 'CASCADE',
+    },
+  )
   passes!: Promise<Pass[]>;
 
   @Field(type => [Shot])
-  @OneToMany(type => Shot, shot => shot.game, {
-    onDelete: 'CASCADE',
-  })
+  @OneToMany(
+    type => Shot,
+    shot => shot.game,
+    {
+      onDelete: 'CASCADE',
+    },
+  )
   shots!: Promise<Shot[]>;
 
   @Field(type => [Intercept])
-  @OneToMany(type => Intercept, intercept => intercept.game, {
-    onDelete: 'CASCADE',
-  })
+  @OneToMany(
+    type => Intercept,
+    intercept => intercept.game,
+    {
+      onDelete: 'CASCADE',
+    },
+  )
   intercepts!: Promise<Intercept[]>;
 }

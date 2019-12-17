@@ -21,17 +21,63 @@ export class Intercept {
   time!: Date;
 
   @Field(type => Game)
-  @ManyToOne(type => Game, game => game.intercepts)
+  @ManyToOne(
+    type => Game,
+    game => game.intercepts,
+  )
   game!: Game;
 
+  @Field(type => Int)
+  @Column({ unsigned: true })
+  gameId!: number;
+
+  /** from */
   @Field(type => Player)
-  @ManyToOne(type => Player, player => player.intercepts)
-  player!: Player;
+  @ManyToOne(
+    type => Player,
+    player => player.ballLosses,
+  )
+  fromPlayer!: Player;
+
+  @Field(type => Int)
+  @Column({ unsigned: true })
+  fromPlayerId!: number;
 
   @Field(type => Team)
-  @ManyToOne(type => Team, team => team.intercepts)
-  team!: Team;
+  @ManyToOne(
+    type => Team,
+    team => team.ballLosses,
+  )
+  fromTeam!: Team;
 
+  @Field(type => Int)
+  @Column({ unsigned: true })
+  fromTeamId!: number;
+
+  /** to */
+  @Field(type => Player)
+  @ManyToOne(
+    type => Player,
+    player => player.intercepts,
+  )
+  toPlayer!: Player;
+
+  @Field(type => Int)
+  @Column({ unsigned: true })
+  toPlayerId!: number;
+
+  @Field(type => Team)
+  @ManyToOne(
+    type => Team,
+    team => team.intercepts,
+  )
+  toTeam!: Team;
+
+  @Field(type => Int)
+  @Column({ unsigned: true })
+  toTeamId!: number;
+
+  /** Position */
   @Field(type => Int)
   @Column({ unsigned: true, type: 'tinyint' })
   x!: number;
