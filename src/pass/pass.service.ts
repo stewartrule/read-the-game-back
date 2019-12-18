@@ -15,12 +15,12 @@ export class PassService {
     gameId,
     fromPlayerId,
     toPlayerId,
-    teamId,
+    fromTeamId,
   }: CreatePassInput): Promise<Pass> {
     const pass = new Pass();
 
     pass.gameId = gameId;
-    pass.teamId = teamId;
+    pass.fromTeamId = fromTeamId;
     pass.fromPlayerId = fromPlayerId;
     pass.toPlayerId = toPlayerId;
 

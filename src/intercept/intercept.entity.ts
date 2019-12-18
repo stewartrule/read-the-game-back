@@ -31,7 +31,6 @@ export class Intercept {
   @Column({ unsigned: true })
   gameId!: number;
 
-  /** from */
   @Field(type => Player)
   @ManyToOne(
     type => Player,
@@ -54,7 +53,6 @@ export class Intercept {
   @Column({ unsigned: true })
   fromTeamId!: number;
 
-  /** to */
   @Field(type => Player)
   @ManyToOne(
     type => Player,
@@ -77,7 +75,6 @@ export class Intercept {
   @Column({ unsigned: true })
   toTeamId!: number;
 
-  /** Position */
   @Field(type => Int)
   @Column({ unsigned: true, type: 'tinyint' })
   x!: number;

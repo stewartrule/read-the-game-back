@@ -10,11 +10,11 @@ export class CreateShotInput implements Partial<Shot> {
 
   @Field(type => Int)
   @Min(0)
-  playerId!: number;
+  fromPlayerId!: number;
 
   @Field(type => Int)
   @Min(0)
-  teamId!: number;
+  fromTeamId!: number;
 
   @Field(type => Int)
   @Min(0)

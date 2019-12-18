@@ -21,10 +21,9 @@ import { Game } from './game.entity';
 import { GameService } from './game.service';
 import { GameFilter } from './input/game.filter';
 import {
-  AreaActionCount,
-  getAreaActionCountByTeam,
-  PlayerAction,
-} from './object-type/area-action-count';
+  GameActionCount,
+  getGameActionCount,
+} from './object-type/game-action-count';
 import {
   getShotCountByPeriod,
   ShotCountByPeriod,
@@ -58,7 +57,7 @@ export class GameResolver {
     topics: [Topic.Game],
   })
   teamUpdated(@Root() { game, shot }: ShotAddedMessage): Team {
-    return game.awayTeam.id === shot.teamId
+    return game.awayTeam.id === shot.fromTeamId
       ? game.awayTeam
       : game.homeTeam;
   }
@@ -82,50 +81,40 @@ export class GameResolver {
   async homeTeamShots(@Root() game: Game) {
     const shots = await game.shots;
 
-    return shots.filter(shot => shot.teamId === game.homeTeam.id);
+    return shots.filter(shot => shot.fromTeamId === game.homeTeam.id);
   }
 
   @FieldResolver(returns => [Shot])
   async awayTeamShots(@Root() game: Game) {
     const shots = await game.shots;
 
-    return shots.filter(shot => shot.teamId === game.awayTeam.id);
+    return shots.filter(shot => shot.fromTeamId === game.awayTeam.id);
   }
 
-  @FieldResolver(returns => AreaActionCount)
+  @FieldResolver(returns => GameActionCount)
   async shotCountByArea(
     @Root() game: Game,
-  ): Promise<AreaActionCount> {
+  ): Promise<GameActionCount> {
     const shots = await game.shots;
 
-    return this.getGameActionCount(game, shots);
+    return getGameActionCount(game, shots);
   }
 
-  @FieldResolver(returns => AreaActionCount)
-  async hitCountByArea(@Root() game: Game): Promise<AreaActionCount> {
+  @FieldResolver(returns => GameActionCount)
+  async hitCountByArea(@Root() game: Game): Promise<GameActionCount> {
     const shots = await game.shots;
     const hits = shots.filter(shot => shot.hit);
 
-    return this.getGameActionCount(game, hits);
+    return getGameActionCount(game, hits);
   }
 
-  @FieldResolver(returns => AreaActionCount)
+  @FieldResolver(returns => GameActionCount)
   async passCountByArea(
     @Root() game: Game,
-  ): Promise<AreaActionCount> {
+  ): Promise<GameActionCount> {
     const passes = await game.passes;
 
-    return this.getGameActionCount(game, passes);
-  }
-
-  private getGameActionCount(
-    game: Game,
-    actions: PlayerAction[],
-  ): AreaActionCount {
-    return {
-      homeTeam: getAreaActionCountByTeam(actions, game.homeTeam),
-      awayTeam: getAreaActionCountByTeam(actions, game.awayTeam),
-    };
+    return getGameActionCount(game, passes);
   }
 
   @FieldResolver(returns => ShotCountByPeriod)
@@ -135,11 +124,11 @@ export class GameResolver {
     const shots = await game.shots;
 
     const home = shots.filter(
-      ({ teamId }) => teamId === game.homeTeam.id,
+      ({ fromTeamId }) => fromTeamId === game.homeTeam.id,
     );
 
     const away = shots.filter(
-      ({ teamId }) => teamId === game.awayTeam.id,
+      ({ fromTeamId }) => fromTeamId === game.awayTeam.id,
     );
 
     return {

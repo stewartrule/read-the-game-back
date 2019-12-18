@@ -21,7 +21,7 @@ export class PassType {
   @Field(type => [Pass])
   @OneToMany(
     type => Pass,
-    pass => pass.type,
+    pass => pass.passType,
   )
   passes!: Pass[];
 }

@@ -70,11 +70,11 @@ export class Shot {
       nullable: false,
     },
   )
-  player!: Promise<Player>;
+  fromPlayer!: Promise<Player>;
 
   @Field(type => Int)
   @Column({ unsigned: true })
-  playerId!: number;
+  fromPlayerId!: number;
 
   @Field(type => Team)
   @ManyToOne(
@@ -84,11 +84,11 @@ export class Shot {
       nullable: false,
     },
   )
-  team!: Promise<Team>;
+  fromTeam!: Promise<Team>;
 
   @Field(type => Int)
   @Column({ unsigned: true })
-  teamId!: number;
+  fromTeamId!: number;
 
   @Field(type => Int)
   @Column({ unsigned: true, type: 'tinyint' })

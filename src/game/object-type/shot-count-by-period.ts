@@ -12,6 +12,16 @@ export class ShotCountByPeriod {
   awayTeam!: TeamShotCountByPeriod[];
 }
 
+const getShotsInPeriod = (
+  shots: Shot[],
+  start: number,
+  stop: number,
+) =>
+  shots.filter(shot => {
+    const time = shot.time.valueOf();
+    return time >= start && time < stop;
+  });
+
 export const getShotCountByPeriod = (
   game: Game,
   shots: Shot[],
@@ -24,10 +34,7 @@ export const getShotCountByPeriod = (
   return Array.from({ length: numPeriods }, (_, i) => {
     const start = gameStart + i * periodDuration;
     const stop = start + periodDuration;
-    const periodShots = shots.filter(shot => {
-      const time = shot.time.valueOf();
-      return time >= start && time < stop;
-    });
+    const periodShots = getShotsInPeriod(shots, start, stop);
 
     return {
       start: new Date(start),

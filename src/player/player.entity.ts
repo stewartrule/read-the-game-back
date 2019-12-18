@@ -79,7 +79,7 @@ export class Player {
   @Field(type => [Shot])
   @OneToMany(
     type => Shot,
-    shot => shot.player,
+    shot => shot.fromPlayer,
   )
   shots!: Promise<Shot[]>;
 

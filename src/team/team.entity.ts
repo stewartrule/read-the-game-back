@@ -54,7 +54,7 @@ export class Team {
   @Field(type => [Shot])
   @OneToMany(
     type => Shot,
-    shot => shot.team,
+    shot => shot.fromTeam,
     {
       cascade: true,
     },
@@ -64,7 +64,7 @@ export class Team {
   @Field(type => [Pass])
   @OneToMany(
     type => Pass,
-    pass => pass.team,
+    pass => pass.fromTeam,
     {
       cascade: true,
     },

@@ -21,11 +21,6 @@ export class TeamResolver {
     return this.teamService.find(filter);
   }
 
-  // @Query(returns => [Team])
-  // teamActivity(@Args() filter: TeamFilter): Promise<Team[]> {
-  //   return this.teamService.find(filter);
-  // }
-
   @FieldResolver(returns => Int)
   async passCount(@Root() team: Team) {
     const passes = await team.passes;
@@ -50,7 +45,7 @@ export class TeamResolver {
     const hits = shots.filter(({ hit }) => hit);
 
     return hits
-      .map(hit => hit.playerId)
+      .map(hit => hit.fromPlayerId)
       .filter((value, index, self) => {
         return self.indexOf(value) === index;
       }).length;

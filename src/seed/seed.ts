@@ -143,8 +143,8 @@ export class Seed {
             const shot = new Shot();
 
             shot.game = game;
-            shot.team = Promise.resolve(team);
-            shot.player = Promise.resolve(player);
+            shot.fromTeam = Promise.resolve(team);
+            shot.fromPlayer = Promise.resolve(player);
             shot.shotType = sample(shotTypes);
 
             shot.time = new Date(game.start.valueOf() + minutes(45));
@@ -185,8 +185,8 @@ export class Seed {
             pass.fromPlayer = player;
             pass.toPlayer = toPlayer;
             pass.game = game;
-            pass.team = team;
-            pass.type = sample(passTypes);
+            pass.fromTeam = team;
+            pass.passType = sample(passTypes);
 
             pass.time = new Date(game.start.valueOf() + minutes(45));
 
@@ -209,9 +209,7 @@ export class Seed {
           async () => {
             const intercept = new Intercept();
 
-            const toPlayer = sample(
-              otherTeam.players.filter(({ id }) => id !== player.id),
-            );
+            const toPlayer = sample(otherTeam.players);
 
             intercept.game = game;
             intercept.fromPlayer = player;

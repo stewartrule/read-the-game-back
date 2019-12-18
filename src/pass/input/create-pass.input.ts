@@ -10,7 +10,7 @@ export class CreatePassInput implements Partial<Pass> {
 
   @Field(type => Int)
   @Min(0)
-  teamId!: number;
+  fromTeamId!: number;
 
   @Field(type => Int)
   @Min(0)

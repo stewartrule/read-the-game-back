@@ -29,7 +29,7 @@ export class Pass {
       nullable: false,
     },
   )
-  type!: PassType;
+  passType!: PassType;
 
   @Field(type => Game)
   @ManyToOne(
@@ -47,11 +47,11 @@ export class Pass {
     type => Team,
     team => team.passes,
   )
-  team!: Team;
+  fromTeam!: Team;
 
   @Field(type => Int)
   @Column({ unsigned: true })
-  teamId!: number;
+  fromTeamId!: number;
 
   @Field(type => Player)
   @ManyToOne(
