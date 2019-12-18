@@ -1,30 +1,65 @@
-import { Args, Query, Resolver } from '@nestjs/graphql';
-import { FieldResolver, Root, ResolverInterface } from 'type-graphql';
-
+import 'reflect-metadata';
+import {
+  Args,
+  FieldResolver,
+  Query,
+  Resolver,
+  Root,
+  Subscription,
+} from 'type-graphql';
+import {
+  filterByType,
+  Message,
+  ShotAddedMessage,
+  Topic,
+} from '../app.messages';
 import { Intercept } from '../intercept/intercept.entity';
 import { Pass } from '../pass/pass.entity';
 import { Shot } from '../shot/shot.entity';
-import { GameFilter } from './dto/game.filter';
+import { Team } from '../team/team.entity';
 import { Game } from './game.entity';
 import { GameService } from './game.service';
-
+import { GameFilter } from './input/game.filter';
 import {
-  ShotCountByPeriod,
+  GameActionCount,
+  getGameActionCount,
+} from './object-type/game-action-count';
+import {
   getShotCountByPeriod,
+  ShotCountByPeriod,
 } from './object-type/shot-count-by-period';
 
-import {
-  AreaActionCount,
-  getAreaActionCountByTeam,
-} from './object-type/area-action-count';
-
 @Resolver(() => Game)
-export class GameResolver implements ResolverInterface<Game> {
+export class GameResolver {
   constructor(private readonly gameService: GameService) {}
 
   @Query(() => [Game])
   games(@Args() filter: GameFilter): Promise<Game[]> {
     return this.gameService.find(filter);
+  }
+
+  @Subscription(returns => Game, {
+    topics: [Topic.Game],
+  })
+  gameUpdated(@Root() { game }: Message): Game {
+    return game;
+  }
+
+  @Subscription(returns => Shot, {
+    topics: [Topic.Game],
+    filter: filterByType('shot'),
+  })
+  shotAdded(@Root() { shot }: ShotAddedMessage): Shot {
+    return shot;
+  }
+
+  @Subscription(returns => Team, {
+    topics: [Topic.Game],
+  })
+  teamUpdated(@Root() { game, shot }: ShotAddedMessage): Team {
+    return game.awayTeam.id === shot.fromTeamId
+      ? game.awayTeam
+      : game.homeTeam;
   }
 
   @FieldResolver(returns => [Shot])
@@ -46,49 +81,40 @@ export class GameResolver implements ResolverInterface<Game> {
   async homeTeamShots(@Root() game: Game) {
     const shots = await game.shots;
 
-    return shots.filter(shot => shot.teamId === game.homeTeam.id);
+    return shots.filter(shot => shot.fromTeamId === game.homeTeam.id);
   }
 
   @FieldResolver(returns => [Shot])
   async awayTeamShots(@Root() game: Game) {
     const shots = await game.shots;
 
-    return shots.filter(shot => shot.teamId === game.awayTeam.id);
+    return shots.filter(shot => shot.fromTeamId === game.awayTeam.id);
   }
 
-  @FieldResolver(returns => AreaActionCount)
+  @FieldResolver(returns => GameActionCount)
   async shotCountByArea(
     @Root() game: Game,
-  ): Promise<AreaActionCount> {
+  ): Promise<GameActionCount> {
     const shots = await game.shots;
 
-    return {
-      homeTeam: getAreaActionCountByTeam(shots, game.homeTeam),
-      awayTeam: getAreaActionCountByTeam(shots, game.awayTeam),
-    };
+    return getGameActionCount(game, shots);
   }
 
-  @FieldResolver(returns => AreaActionCount)
-  async hitCountByArea(@Root() game: Game): Promise<AreaActionCount> {
+  @FieldResolver(returns => GameActionCount)
+  async hitCountByArea(@Root() game: Game): Promise<GameActionCount> {
     const shots = await game.shots;
     const hits = shots.filter(shot => shot.hit);
 
-    return {
-      homeTeam: getAreaActionCountByTeam(hits, game.homeTeam),
-      awayTeam: getAreaActionCountByTeam(hits, game.awayTeam),
-    };
+    return getGameActionCount(game, hits);
   }
 
-  @FieldResolver(returns => AreaActionCount)
+  @FieldResolver(returns => GameActionCount)
   async passCountByArea(
     @Root() game: Game,
-  ): Promise<AreaActionCount> {
+  ): Promise<GameActionCount> {
     const passes = await game.passes;
 
-    return {
-      homeTeam: getAreaActionCountByTeam(passes, game.homeTeam),
-      awayTeam: getAreaActionCountByTeam(passes, game.awayTeam),
-    };
+    return getGameActionCount(game, passes);
   }
 
   @FieldResolver(returns => ShotCountByPeriod)
@@ -98,10 +124,11 @@ export class GameResolver implements ResolverInterface<Game> {
     const shots = await game.shots;
 
     const home = shots.filter(
-      ({ teamId }) => teamId === game.homeTeam.id,
+      ({ fromTeamId }) => fromTeamId === game.homeTeam.id,
     );
+
     const away = shots.filter(
-      ({ teamId }) => teamId === game.awayTeam.id,
+      ({ fromTeamId }) => fromTeamId === game.awayTeam.id,
     );
 
     return {

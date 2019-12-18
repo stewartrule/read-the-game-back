@@ -1,18 +1,25 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import * as faker from 'faker/locale/de';
+import * as faker from 'faker';
+import { Service } from 'typedi';
 import { Repository } from 'typeorm';
-
+import { InjectRepository } from 'typeorm-typedi-extensions';
 import { Game } from '../game/game.entity';
-import { Player } from '../player/player.entity';
-import { Shot } from '../shot/shot.entity';
-import { ShotType } from '../shot-type/shot-type.entity';
-import { Team } from '../team/team.entity';
-import { Pass } from '../pass/pass.entity';
+import { Intercept } from '../intercept/intercept.entity';
 import { PassType } from '../pass-type/pass-type.entity';
-import { mapParallel, mapSeq, range, chance, minutes } from './util';
+import { Pass } from '../pass/pass.entity';
+import { Player } from '../player/player.entity';
+import { ShotType } from '../shot-type/shot-type.entity';
+import { Shot } from '../shot/shot.entity';
+import { Team } from '../team/team.entity';
+import {
+  chance,
+  mapParallel,
+  mapSeq,
+  minutes,
+  range,
+  sample,
+} from './util';
 
-@Injectable()
+@Service()
 export class Seed {
   constructor(
     @InjectRepository(Game)
@@ -35,19 +42,25 @@ export class Seed {
 
     @InjectRepository(Team)
     private readonly teamRepository: Repository<Team>,
+
+    @InjectRepository(Intercept)
+    private readonly interceptRepository: Repository<Intercept>,
   ) {}
 
   async run() {
     const teamNames = [
       'Dortmund',
-      'Mönchengladbach',
       'Eintracht Frankfurt',
       'FC Augsburg',
       'FC Bayern München',
       'FC Ingolstadt 04',
       'FC Schalke 04',
-      'RB Leipzig',
       'Hamburger SV',
+      'Hindenburg Allenstein',
+      'Mönchengladbach',
+      'RB Leipzig',
+      'Stettiner SC',
+      'Werder Bremen',
     ];
 
     const teams = await mapSeq(teamNames, async teamName => {
@@ -112,27 +125,33 @@ export class Seed {
       relations: [],
     });
 
-    const shotType = new ShotType();
-    shotType.name = 'Chip';
-    await this.shotTypeRepository.save(shotType);
+    const shotTypes = await mapParallel(
+      ['Standard', 'Straight', 'Inside', 'Chip', 'Bending'],
+      async name => {
+        const shotType = new ShotType();
+        shotType.name = name;
+        await this.shotTypeRepository.save(shotType);
+        return shotType;
+      },
+    );
 
     const seedShots = (game: Game, team: Team) => {
       return mapParallel(team.players, async player => {
         return mapParallel(
-          range(0, Math.round(Math.random() * 7)),
-          async index => {
+          range(0, Math.round(Math.random() * 2)),
+          async () => {
             const shot = new Shot();
 
             shot.game = game;
-            shot.team = Promise.resolve(team);
-            shot.player = Promise.resolve(player);
-            shot.type = shotType;
+            shot.fromTeam = Promise.resolve(team);
+            shot.fromPlayer = Promise.resolve(player);
+            shot.shotType = sample(shotTypes);
 
             shot.time = new Date(game.start.valueOf() + minutes(45));
 
-            const onTarget = chance(0.2);
+            const onTarget = chance(0.5);
             shot.onTarget = onTarget;
-            shot.hit = onTarget ? chance(0.5) : false;
+            shot.hit = onTarget ? chance(0.6) : false;
             shot.out = onTarget ? false : chance(0.5);
             shot.x = Math.floor(Math.random() * 120);
             shot.y = Math.floor(Math.random() * 90);
@@ -142,21 +161,32 @@ export class Seed {
       });
     };
 
-    const passType = new PassType();
-    passType.name = 'Long';
-    await this.passTypeRepository.save(passType);
+    const passTypes = await mapParallel(
+      ['Push', 'Long', 'Backward', 'Piercing', 'Wall'],
+      async name => {
+        const passType = new PassType();
+        passType.name = name;
+        await this.passTypeRepository.save(passType);
+        return passType;
+      },
+    );
 
     const seedPasses = (game: Game, team: Team) => {
       return mapParallel(team.players, async player => {
         return mapParallel(
-          range(0, Math.round(Math.random() * 7)),
-          async index => {
+          range(0, Math.round(Math.random() * 5)),
+          async () => {
             const pass = new Pass();
 
-            pass.player = player;
+            const toPlayer = sample(
+              team.players.filter(({ id }) => id !== player.id),
+            );
+
+            pass.fromPlayer = player;
+            pass.toPlayer = toPlayer;
             pass.game = game;
-            pass.team = team;
-            pass.type = passType;
+            pass.fromTeam = team;
+            pass.passType = sample(passTypes);
 
             pass.time = new Date(game.start.valueOf() + minutes(45));
 
@@ -168,14 +198,51 @@ export class Seed {
       });
     };
 
-    await mapParallel(games, async game => {
-      await seedShots(game, game.homeTeam);
-      await seedPasses(game, game.homeTeam);
-    });
+    const seedIntercepts = (
+      game: Game,
+      team: Team,
+      otherTeam: Team,
+    ) => {
+      return mapParallel(team.players, async player => {
+        return mapParallel(
+          range(0, Math.round(Math.random() * 5)),
+          async () => {
+            const intercept = new Intercept();
+
+            const toPlayer = sample(otherTeam.players);
+
+            intercept.game = game;
+            intercept.fromPlayer = player;
+            intercept.fromTeam = team;
+            intercept.toPlayer = toPlayer;
+            intercept.toTeamId = toPlayer.teamId;
+
+            intercept.time = new Date(
+              game.start.valueOf() + minutes(45),
+            );
+
+            intercept.x = Math.floor(Math.random() * 120);
+            intercept.y = Math.floor(Math.random() * 90);
+
+            return this.interceptRepository.save(intercept);
+          },
+        );
+      });
+    };
+
+    const seedGameForTeam = async (
+      game: Game,
+      team: Team,
+      otherTeam: Team,
+    ) => {
+      await seedShots(game, team);
+      await seedPasses(game, team);
+      await seedIntercepts(game, team, otherTeam);
+    };
 
     await mapParallel(games, async game => {
-      await seedShots(game, game.awayTeam);
-      await seedPasses(game, game.awayTeam);
+      await seedGameForTeam(game, game.homeTeam, game.awayTeam);
+      await seedGameForTeam(game, game.awayTeam, game.homeTeam);
     });
   }
 }

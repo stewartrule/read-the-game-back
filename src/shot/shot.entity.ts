@@ -1,16 +1,14 @@
+import { Field, ID, Int, ObjectType } from 'type-graphql';
 import {
   Column,
   Entity,
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-
 import { Game } from '../game/game.entity';
 import { Player } from '../player/player.entity';
 import { ShotType } from '../shot-type/shot-type.entity';
 import { Team } from '../team/team.entity';
-
-import { Field, ID, ObjectType, Int } from 'type-graphql';
 
 @Entity({ orderBy: { time: 'ASC' } })
 @ObjectType()
@@ -36,20 +34,28 @@ export class Shot {
   onTarget!: boolean;
 
   @Field(type => ShotType)
-  @ManyToOne(type => ShotType, shotType => shotType.shots, {
-    nullable: false,
-    eager: true,
-  })
-  type!: ShotType;
+  @ManyToOne(
+    type => ShotType,
+    shotType => shotType.shots,
+    {
+      nullable: false,
+      eager: true,
+    },
+  )
+  shotType!: ShotType;
 
   @Field(type => Int)
   @Column({ unsigned: true })
-  typeId!: number;
+  shotTypeId!: number;
 
   @Field(type => Game)
-  @ManyToOne(type => Game, game => game.shots, {
-    nullable: false,
-  })
+  @ManyToOne(
+    type => Game,
+    game => game.shots,
+    {
+      nullable: false,
+    },
+  )
   game!: Game;
 
   @Field(type => Int)
@@ -57,24 +63,32 @@ export class Shot {
   gameId!: number;
 
   @Field(type => Player)
-  @ManyToOne(type => Player, player => player.shots, {
-    nullable: false,
-  })
-  player!: Promise<Player>;
+  @ManyToOne(
+    type => Player,
+    player => player.shots,
+    {
+      nullable: false,
+    },
+  )
+  fromPlayer!: Promise<Player>;
 
   @Field(type => Int)
   @Column({ unsigned: true })
-  playerId!: number;
+  fromPlayerId!: number;
 
   @Field(type => Team)
-  @ManyToOne(type => Team, team => team.shots, {
-    nullable: false,
-  })
-  team!: Promise<Team>;
+  @ManyToOne(
+    type => Team,
+    team => team.shots,
+    {
+      nullable: false,
+    },
+  )
+  fromTeam!: Promise<Team>;
 
   @Field(type => Int)
   @Column({ unsigned: true })
-  teamId!: number;
+  fromTeamId!: number;
 
   @Field(type => Int)
   @Column({ unsigned: true, type: 'tinyint' })

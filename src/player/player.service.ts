@@ -1,9 +1,9 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { Service } from 'typedi';
 import { Repository } from 'typeorm';
+import { InjectRepository } from 'typeorm-typedi-extensions';
 import { Player } from './player.entity';
 
-@Injectable()
+@Service()
 export class PlayerService {
   constructor(
     @InjectRepository(Player)

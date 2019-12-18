@@ -38,12 +38,14 @@ export const clamp = (value: number, min: number, max: number) =>
 
 export const chance = (value = 0.5) => Math.random() < value;
 
-export const random = <T>(values: T[]): Maybe<T> => {
+export const sample = <T>(values: T[]): T => {
   const { length } = values;
 
-  return length
-    ? values[Math.floor(Math.random() * length)]
-    : undefined;
+  if (length === 0) {
+    throw Error('sample does not work with empty arrays');
+  }
+
+  return values[Math.floor(Math.random() * length)];
 };
 
 const MINUTE = 1000 * 60;

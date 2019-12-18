@@ -1,12 +1,11 @@
+import { Field, ID, ObjectType } from 'type-graphql';
 import {
   Column,
   Entity,
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-
 import { Pass } from '../pass/pass.entity';
-import { Field, ID, ObjectType } from 'type-graphql';
 
 @Entity()
 @ObjectType()
@@ -20,6 +19,9 @@ export class PassType {
   name!: string;
 
   @Field(type => [Pass])
-  @OneToMany(type => Pass, pass => pass.type)
+  @OneToMany(
+    type => Pass,
+    pass => pass.passType,
+  )
   passes!: Pass[];
 }

@@ -1,20 +1,25 @@
-import { NestFactory } from '@nestjs/core';
-import { SeedModule } from './seed/seed.module';
+import 'reflect-metadata';
+import { Container } from 'typedi';
+import * as TypeORM from 'typeorm';
+import entities from './app.entities';
+import config from './config/db';
 import { Seed } from './seed/seed';
 
-async function bootstrap() {
-  const context = await NestFactory.createApplicationContext(
-    SeedModule,
-  );
-  const seed = context.get(Seed);
+TypeORM.useContainer(Container);
 
-  try {
-    await seed.run();
-  } catch (e) {
-    console.error(e);
-  } finally {
-    context.close();
-  }
+async function bootstrap() {
+  const conn = await TypeORM.createConnection({
+    ...config,
+    entities,
+    synchronize: true,
+    dropSchema: true,
+  });
+
+  const seed = Container.get(Seed);
+
+  await seed.run();
+
+  conn.close();
 }
 
 bootstrap();
