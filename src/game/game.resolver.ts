@@ -6,6 +6,7 @@ import {
   Resolver,
   Root,
   Subscription,
+  Int,
 } from 'type-graphql';
 import {
   filterByType,
@@ -77,18 +78,40 @@ export class GameResolver {
     return await game.passes;
   }
 
-  @FieldResolver(returns => [Shot])
-  async homeTeamShots(@Root() game: Game) {
+  async getHomeTeamShots(game: Game) {
     const shots = await game.shots;
 
     return shots.filter(shot => shot.fromTeamId === game.homeTeam.id);
   }
 
-  @FieldResolver(returns => [Shot])
-  async awayTeamShots(@Root() game: Game) {
+  async getAwayTeamShots(game: Game) {
     const shots = await game.shots;
 
     return shots.filter(shot => shot.fromTeamId === game.awayTeam.id);
+  }
+
+  @FieldResolver(returns => [Shot])
+  async homeTeamShots(@Root() game: Game) {
+    return this.getHomeTeamShots(game);
+  }
+
+  @FieldResolver(returns => [Shot])
+  async awayTeamShots(@Root() game: Game) {
+    return this.getAwayTeamShots(game);
+  }
+
+  @FieldResolver(returns => Int)
+  async awayTeamScore(@Root() game: Game) {
+    const shots = await this.getAwayTeamShots(game);
+
+    return shots.filter(shot => shot.hit).length;
+  }
+
+  @FieldResolver(returns => Int)
+  async homeTeamScore(@Root() game: Game) {
+    const shots = await this.getHomeTeamShots(game);
+
+    return shots.filter(shot => shot.hit).length;
   }
 
   @FieldResolver(returns => GameActionCount)
