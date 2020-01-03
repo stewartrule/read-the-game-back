@@ -52,16 +52,6 @@ export class TeamResolver {
   }
 
   @FieldResolver(returns => Int)
-  async averageStrength(@Root() { players }: Team) {
-    const strength = players.reduce(
-      (sum, player) => sum + player.strength,
-      0,
-    );
-
-    return players.length ? Math.round(strength / players.length) : 0;
-  }
-
-  @FieldResolver(returns => Int)
   async interceptCount(@Root() team: Team) {
     const intercepts = await team.intercepts;
     return intercepts.length;

@@ -8,6 +8,8 @@ import {
 } from 'typeorm';
 import { Intercept } from '../intercept/intercept.entity';
 import { Pass } from '../pass/pass.entity';
+import { PositionType } from '../position-type/position-type.entity';
+import { Position } from '../position/position.entity';
 import { Shot } from '../shot/shot.entity';
 import { Team } from '../team/team.entity';
 
@@ -40,14 +42,6 @@ export class Player {
     type: 'tinyint',
     nullable: false,
   })
-  strength!: number;
-
-  @Field(type => Int)
-  @Column({
-    unsigned: true,
-    type: 'tinyint',
-    nullable: false,
-  })
   balance!: number;
 
   @Field(type => Int)
@@ -71,6 +65,16 @@ export class Player {
     },
   )
   team!: Team;
+
+  @Field(type => PositionType)
+  @ManyToOne(
+    type => PositionType,
+    positionType => positionType.players,
+    {
+      nullable: false,
+    },
+  )
+  playerType!: PositionType;
 
   @Field(type => Int)
   @Column({ unsigned: true })
@@ -110,4 +114,11 @@ export class Player {
     intercept => intercept.fromPlayer,
   )
   ballLosses!: Intercept[];
+
+  @Field(type => [Position])
+  @OneToMany(
+    type => Position,
+    position => position.player,
+  )
+  positions!: Position[];
 }

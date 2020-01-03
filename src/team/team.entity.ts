@@ -9,6 +9,7 @@ import { Game } from '../game/game.entity';
 import { Intercept } from '../intercept/intercept.entity';
 import { Pass } from '../pass/pass.entity';
 import { Player } from '../player/player.entity';
+import { Position } from '../position/position.entity';
 import { Shot } from '../shot/shot.entity';
 
 @Entity()
@@ -90,4 +91,11 @@ export class Team {
     },
   )
   ballLosses!: Promise<Intercept[]>;
+
+  @Field(type => [Position])
+  @OneToMany(
+    type => Position,
+    position => position.team,
+  )
+  positions!: Position[];
 }
