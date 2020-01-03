@@ -1,4 +1,5 @@
 import { ConnectionOptions } from 'typeorm';
+import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 
 const config: ConnectionOptions = {
   type: 'mysql',
@@ -7,6 +8,7 @@ const config: ConnectionOptions = {
   username: 'root',
   password: 'root',
   database: 'game',
+  namingStrategy: new SnakeNamingStrategy(),
 };
 
 export default config;

@@ -6,7 +6,7 @@
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "tsc -p ./tsconfig.json",
-    "test": "tsc --noEmit -p ./tsconfig.json",
+    "ts-check": "tsc --noEmit -p ./tsconfig.json",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "ts-node src/main.ts",
     "seed": "ts-node src/seed.ts",
@@ -27,6 +27,7 @@
     "type-graphql": "^0.17.5",
     "typedi": "^0.8.0",
     "typeorm": "^0.2.19",
+    "typeorm-naming-strategies": "^1.1.0",
     "typeorm-typedi-extensions": "^0.2.3"
   },
   "devDependencies": {

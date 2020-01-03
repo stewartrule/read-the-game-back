@@ -8,7 +8,7 @@ import { Seed } from './seed/seed';
 TypeORM.useContainer(Container);
 
 async function bootstrap() {
-  const conn = await TypeORM.createConnection({
+  const orm = await TypeORM.createConnection({
     ...config,
     entities,
     synchronize: true,
@@ -19,7 +19,7 @@ async function bootstrap() {
 
   await seed.run();
 
-  conn.close();
+  orm.close();
 }
 
 bootstrap();
