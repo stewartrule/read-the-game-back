@@ -1,11 +1,9 @@
-type Maybe<T> = T | undefined;
-
 export const range = (min: number, max: number) =>
   Array.from({ length: max - min }).map((_, index) => index + min);
 
 export const mapSeq = async <T, R>(
   items: T[],
-  map: (item: T) => Promise<R>,
+  map: (item: T, index: number) => Promise<R>,
 ): Promise<R[]> => {
   const initial = items.slice(0, 1);
   const rest = items.slice(1);
@@ -38,14 +36,36 @@ export const clamp = (value: number, min: number, max: number) =>
 
 export const chance = (value = 0.5) => Math.random() < value;
 
+export const findOrFail = <T>(
+  values: T[],
+  predicate: (value: T) => boolean,
+): T => {
+  const value = values.find(predicate);
+
+  if (value == null) {
+    throw Error('could not find value by given predicate');
+  }
+
+  return value;
+};
+
 export const sample = <T>(values: T[]): T => {
   const { length } = values;
 
   if (length === 0) {
-    throw Error('sample does not work with empty arrays');
+    throw Error('could not sample value on empty array');
   }
 
   return values[Math.floor(Math.random() * length)];
+};
+
+export const shuffle = <T>(input: T[]): T[] => {
+  const output = input.slice();
+  for (let i = output.length - 1; i > 0; i--) {
+    let j = Math.floor(Math.random() * (i + 1));
+    [output[i], output[j]] = [output[j], output[i]];
+  }
+  return output;
 };
 
 const MINUTE = 1000 * 60;

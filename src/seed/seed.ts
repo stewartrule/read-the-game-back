@@ -4,20 +4,57 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from 'typeorm-typedi-extensions';
 import { Game } from '../game/game.entity';
 import { Intercept } from '../intercept/intercept.entity';
-import { PassType } from '../pass-type/pass-type.entity';
+import {
+  PassType,
+  PassTypeName,
+} from '../pass-type/pass-type.entity';
 import { Pass } from '../pass/pass.entity';
 import { Player } from '../player/player.entity';
+import {
+  PositionType,
+  PositionTypeName,
+} from '../position-type/position-type.entity';
+import { Position } from '../position/position.entity';
 import { ShotType } from '../shot-type/shot-type.entity';
 import { Shot } from '../shot/shot.entity';
 import { Team } from '../team/team.entity';
 import {
   chance,
+  findOrFail,
   mapParallel,
   mapSeq,
   minutes,
   range,
   sample,
+  shuffle,
 } from './util';
+
+type PlayerSetup = {
+  type: PositionTypeName;
+  playing: number;
+  available: number;
+  stamina: number;
+  balance: number;
+}[];
+
+const spreadBy = (
+  value: number,
+  range: number,
+  fluctuation: number,
+) => {
+  return (
+    value * range + (fluctuation / 2 - Math.random() * fluctuation)
+  );
+};
+
+function getPositionsByType(
+  positions: Position[],
+  types: PositionTypeName[],
+) {
+  return positions.filter(position =>
+    types.includes(position.positionType.name),
+  );
+}
 
 @Service()
 export class Seed {
@@ -25,14 +62,23 @@ export class Seed {
     @InjectRepository(Game)
     private readonly gameRepository: Repository<Game>,
 
-    @InjectRepository(Player)
-    private readonly playerRepository: Repository<Player>,
+    @InjectRepository(Intercept)
+    private readonly interceptRepository: Repository<Intercept>,
 
     @InjectRepository(Pass)
     private readonly passRepository: Repository<Pass>,
 
     @InjectRepository(PassType)
     private readonly passTypeRepository: Repository<PassType>,
+
+    @InjectRepository(Player)
+    private readonly playerRepository: Repository<Player>,
+
+    @InjectRepository(Position)
+    private readonly positionRepository: Repository<Position>,
+
+    @InjectRepository(PositionType)
+    private readonly positionTypeRepository: Repository<PositionType>,
 
     @InjectRepository(Shot)
     private readonly shotRepository: Repository<Shot>,
@@ -42,12 +88,50 @@ export class Seed {
 
     @InjectRepository(Team)
     private readonly teamRepository: Repository<Team>,
-
-    @InjectRepository(Intercept)
-    private readonly interceptRepository: Repository<Intercept>,
   ) {}
 
   async run() {
+    const playerSetup: PlayerSetup = [
+      {
+        type: 'goalkeeper',
+        playing: 1,
+        available: 2,
+        stamina: 2,
+        balance: 2,
+      },
+      {
+        type: 'defender',
+        playing: 4,
+        available: 2,
+        stamina: 2,
+        balance: 2,
+      },
+      {
+        type: 'midfielder',
+        playing: 4,
+        available: 2,
+        stamina: 3,
+        balance: 2,
+      },
+      {
+        type: 'forward',
+        playing: 2,
+        available: 2,
+        stamina: 4,
+        balance: 1,
+      },
+    ];
+
+    const positionTypes = await mapSeq(
+      playerSetup,
+      async ({ type }) => {
+        const positionType = new PositionType();
+        positionType.name = type;
+        await this.positionTypeRepository.save(positionType);
+        return positionType;
+      },
+    );
+
     const teamNames = [
       'Dortmund',
       'Eintracht Frankfurt',
@@ -75,45 +159,50 @@ export class Seed {
       return team;
     });
 
-    await mapParallel(teams, async team => {
-      return await mapParallel(range(0, 11), async index => {
-        const player = new Player();
-        player.dob = faker.date.between('1997-01-01', '2001-12-31');
-        player.height = 164 + Math.round(Math.random() * 28);
+    await mapParallel(teams, team => {
+      return mapParallel(
+        playerSetup,
+        ({ available, stamina, balance, type }) => {
+          return mapParallel(range(0, available), async () => {
+            const player = new Player();
 
-        const base = 38;
-        const strength = Math.round(Math.random() * base);
-        const rest = base - strength;
-        const stamina = Math.round(Math.random() * rest);
-        const balance = base - stamina;
+            player.playerType = findOrFail(
+              positionTypes,
+              positionType => positionType.name === type,
+            );
 
-        player.strength = base + strength;
-        player.stamina = base + stamina;
-        player.balance = base + balance;
-
-        player.firstName = faker.name.firstName(1);
-        player.lastName = faker.name.lastName();
-        player.team = team;
-        await this.playerRepository.save(player);
-        return player;
-      });
+            player.team = team;
+            player.height = 164 + Math.round(Math.random() * 28);
+            player.stamina = spreadBy(stamina, 12, 6);
+            player.balance = spreadBy(balance, 12, 6);
+            player.firstName = faker.name.firstName(1);
+            player.lastName = faker.name.lastName();
+            player.dob = faker.date.between(
+              '1997-01-01',
+              '2001-12-31',
+            );
+            await this.playerRepository.save(player);
+            return player;
+          });
+        },
+      );
     });
 
-    await mapParallel(teams.slice(1), async (awayTeam, index) => {
-      const start = new Date();
-      start.setDate(start.getDate() + index);
-      start.setHours(20, 0, 0, 0);
+    await mapSeq(teams.slice(1), async (awayTeam, index) => {
+      const startedAt = new Date();
+      startedAt.setDate(startedAt.getDate() + index);
+      startedAt.setHours(20, 0, 0, 0);
 
-      const stop = new Date();
-      stop.setDate(stop.getDate() + index);
-      stop.setHours(20, 45, 0, 0);
+      const endedAt = new Date();
+      endedAt.setDate(endedAt.getDate() + index);
+      endedAt.setHours(20, 45, 0, 0);
+
+      const game = new Game();
+      game.scheduledAt = startedAt;
+      game.startedAt = startedAt;
+      game.endedAt = endedAt;
 
       const homeTeam = teams[index];
-      const game = new Game();
-      game.name = `${homeTeam.abbr} - ${awayTeam.abbr}`;
-      game.start = start;
-      game.stop = stop;
-
       game.awayTeam = awayTeam;
       game.homeTeam = homeTeam;
 
@@ -135,19 +224,25 @@ export class Seed {
       },
     );
 
-    const seedShots = (game: Game, team: Team) => {
-      return mapParallel(team.players, async player => {
+    const seedShots = async (
+      game: Game,
+      team: Team,
+      positions: Position[],
+    ) => {
+      return mapParallel(positions, position => {
         return mapParallel(
           range(0, Math.round(Math.random() * 2)),
-          async () => {
+          () => {
             const shot = new Shot();
 
             shot.game = game;
             shot.fromTeam = Promise.resolve(team);
-            shot.fromPlayer = Promise.resolve(player);
+            shot.fromPlayer = Promise.resolve(position.player);
             shot.shotType = sample(shotTypes);
 
-            shot.time = new Date(game.start.valueOf() + minutes(45));
+            shot.happenedAt = new Date(
+              game.scheduledAt.valueOf() + minutes(45),
+            );
 
             const onTarget = chance(0.5);
             shot.onTarget = onTarget;
@@ -161,34 +256,48 @@ export class Seed {
       });
     };
 
-    const passTypes = await mapParallel(
-      ['Push', 'Long', 'Backward', 'Piercing', 'Wall'],
-      async name => {
-        const passType = new PassType();
-        passType.name = name;
-        await this.passTypeRepository.save(passType);
-        return passType;
-      },
-    );
+    const passTypeNames: PassTypeName[] = [
+      'Push',
+      'Long',
+      'Backward',
+      'Piercing',
+      'Wall',
+    ];
+    const passTypes = await mapParallel(passTypeNames, async name => {
+      const passType = new PassType();
+      passType.name = name;
+      await this.passTypeRepository.save(passType);
+      return passType;
+    });
 
-    const seedPasses = (game: Game, team: Team) => {
-      return mapParallel(team.players, async player => {
+    const seedPasses = (
+      game: Game,
+      team: Team,
+      positions: Position[],
+    ) => {
+      return mapParallel(positions, position => {
         return mapParallel(
           range(0, Math.round(Math.random() * 5)),
-          async () => {
+          () => {
             const pass = new Pass();
 
-            const toPlayer = sample(
-              team.players.filter(({ id }) => id !== player.id),
+            const toPosition = sample(
+              positions.filter(
+                ({ id, positionTypeId }) =>
+                  positionTypeId === position.positionType.id &&
+                  id !== position.id,
+              ),
             );
 
-            pass.fromPlayer = player;
-            pass.toPlayer = toPlayer;
+            pass.fromPlayer = position.player;
+            pass.toPlayer = toPosition.player;
             pass.game = game;
             pass.fromTeam = team;
             pass.passType = sample(passTypes);
 
-            pass.time = new Date(game.start.valueOf() + minutes(45));
+            pass.happenedAt = new Date(
+              game.scheduledAt.valueOf() + minutes(45),
+            );
 
             pass.x = Math.floor(Math.random() * 120);
             pass.y = Math.floor(Math.random() * 90);
@@ -201,24 +310,30 @@ export class Seed {
     const seedIntercepts = (
       game: Game,
       team: Team,
-      otherTeam: Team,
+      teamPositions: Position[],
+      otherTeamPositions: Position[],
     ) => {
-      return mapParallel(team.players, async player => {
+      return mapParallel(teamPositions, position => {
         return mapParallel(
           range(0, Math.round(Math.random() * 5)),
-          async () => {
+          () => {
+            const toPosition = sample(
+              otherTeamPositions.filter(
+                ({ positionTypeId }) =>
+                  positionTypeId === position.positionType.id,
+              ),
+            );
+
             const intercept = new Intercept();
 
-            const toPlayer = sample(otherTeam.players);
-
             intercept.game = game;
-            intercept.fromPlayer = player;
+            intercept.fromPlayer = position.player;
             intercept.fromTeam = team;
-            intercept.toPlayer = toPlayer;
-            intercept.toTeamId = toPlayer.teamId;
+            intercept.toPlayer = toPosition.player;
+            intercept.toTeamId = toPosition.player.teamId;
 
-            intercept.time = new Date(
-              game.start.valueOf() + minutes(45),
+            intercept.happenedAt = new Date(
+              game.scheduledAt.valueOf() + minutes(45),
             );
 
             intercept.x = Math.floor(Math.random() * 120);
@@ -230,19 +345,110 @@ export class Seed {
       });
     };
 
+    const seedPositions = (game: Game, team: Team) => {
+      return mapParallel(playerSetup, async ({ playing, type }) => {
+        const playerType = findOrFail(
+          positionTypes,
+          positionType => positionType.name === type,
+        );
+
+        const players = await this.playerRepository.find({
+          where: {
+            playerType,
+          },
+        });
+
+        const lineup = shuffle(players).slice(0, playing);
+
+        return mapParallel(lineup, async player => {
+          const position = new Position();
+          position.game = game;
+          position.team = team;
+          position.player = player;
+          position.startedAt = game.startedAt;
+          position.endedAt = game.endedAt;
+          position.positionType = findOrFail(
+            positionTypes,
+            positionType => positionType.name === type,
+          );
+
+          await this.positionRepository.save(position);
+          return position;
+        });
+      });
+    };
+
     const seedGameForTeam = async (
       game: Game,
       team: Team,
-      otherTeam: Team,
+      teamPositions: Position[],
+      otherTeamPositions: Position[],
     ) => {
-      await seedShots(game, team);
-      await seedPasses(game, team);
-      await seedIntercepts(game, team, otherTeam);
+      return Promise.all([
+        seedShots(
+          game,
+          team,
+          getPositionsByType(teamPositions, ['forward']),
+        ),
+        seedPasses(
+          game,
+          team,
+          getPositionsByType(teamPositions, [
+            'forward',
+            'midfielder',
+            'defender',
+          ]),
+        ),
+        seedIntercepts(
+          game,
+          team,
+          getPositionsByType(teamPositions, [
+            'forward',
+            'midfielder',
+            'defender',
+          ]),
+          getPositionsByType(otherTeamPositions, [
+            'forward',
+            'midfielder',
+            'defender',
+          ]),
+        ),
+      ]);
     };
 
     await mapParallel(games, async game => {
-      await seedGameForTeam(game, game.homeTeam, game.awayTeam);
-      await seedGameForTeam(game, game.awayTeam, game.homeTeam);
+      await seedPositions(game, game.homeTeam);
+      await seedPositions(game, game.awayTeam);
+
+      const positions = await this.positionRepository.find({
+        where: {
+          game,
+        },
+        relations: ['team', 'player', 'game', 'positionType'],
+      });
+
+      const homeTeamPositions = positions.filter(
+        position => position.teamId === game.homeTeam.id,
+      );
+
+      const awayTeamPositions = positions.filter(
+        position => position.teamId === game.awayTeam.id,
+      );
+
+      return Promise.all([
+        seedGameForTeam(
+          game,
+          game.homeTeam,
+          homeTeamPositions,
+          awayTeamPositions,
+        ),
+        seedGameForTeam(
+          game,
+          game.awayTeam,
+          awayTeamPositions,
+          homeTeamPositions,
+        ),
+      ]);
     });
   }
 }
