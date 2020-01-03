@@ -7,6 +7,13 @@ import {
 } from 'typeorm';
 import { Pass } from '../pass/pass.entity';
 
+export type PassTypeName =
+  | 'Push'
+  | 'Long'
+  | 'Backward'
+  | 'Piercing'
+  | 'Wall';
+
 @Entity()
 @ObjectType()
 export class PassType {
@@ -16,7 +23,7 @@ export class PassType {
 
   @Field()
   @Column()
-  name!: string;
+  name!: PassTypeName;
 
   @Field(type => [Pass])
   @OneToMany(

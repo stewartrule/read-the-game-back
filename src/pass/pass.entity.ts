@@ -9,17 +9,18 @@ import { Game } from '../game/game.entity';
 import { PassType } from '../pass-type/pass-type.entity';
 import { Player } from '../player/player.entity';
 import { Team } from '../team/team.entity';
+import { PlayerAction } from '../types';
 
-@Entity({ orderBy: { time: 'ASC' } })
+@Entity({ orderBy: { happenedAt: 'ASC' } })
 @ObjectType()
-export class Pass {
+export class Pass implements PlayerAction {
   @Field(type => ID)
   @PrimaryGeneratedColumn({ unsigned: true })
   id!: number;
 
   @Field(type => Date)
   @Column()
-  time!: Date;
+  happenedAt!: Date;
 
   @Field(type => PassType)
   @ManyToOne(

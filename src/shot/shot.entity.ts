@@ -9,17 +9,18 @@ import { Game } from '../game/game.entity';
 import { Player } from '../player/player.entity';
 import { ShotType } from '../shot-type/shot-type.entity';
 import { Team } from '../team/team.entity';
+import { PlayerAction } from '../types';
 
-@Entity({ orderBy: { time: 'ASC' } })
+@Entity({ orderBy: { happenedAt: 'ASC' } })
 @ObjectType()
-export class Shot {
+export class Shot implements PlayerAction {
   @Field(type => ID)
   @PrimaryGeneratedColumn({ unsigned: true })
   id!: number;
 
   @Field(type => Date)
   @Column()
-  time!: Date;
+  happenedAt!: Date;
 
   @Field(type => Boolean)
   @Column({ unsigned: true, width: 1 })

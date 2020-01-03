@@ -24,7 +24,7 @@ export class PassService {
     pass.fromPlayerId = fromPlayerId;
     pass.toPlayerId = toPlayerId;
 
-    pass.time = new Date();
+    pass.happenedAt = new Date();
 
     await this.passRepository.save(pass);
     return pass;

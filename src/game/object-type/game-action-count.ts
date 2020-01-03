@@ -1,15 +1,8 @@
 import { Field, ObjectType } from 'type-graphql';
 import { Game } from '../../game/game.entity';
 import { Team } from '../../team/team.entity';
+import { PlayerAction } from '../../types';
 import { TeamAreaActionCount } from './team-area-action-count';
-
-export type PlayerAction = {
-  x: number;
-  y: number;
-  fromPlayerId: number;
-  fromTeamId: number;
-  time: Date;
-};
 
 type TeamActionCount = TeamAreaActionCount[];
 
@@ -31,7 +24,9 @@ function replace<T>(input: T[], index: number, value: T): T[] {
 const AreaX = 120 / 5;
 const AreaY = 90 / 3;
 
-export const getPlayerActionCount = (actions: PlayerAction[]) =>
+export const getPlayerActionCount = (
+  actions: PlayerAction[],
+): TeamAreaActionCount[] =>
   actions.reduce((actionCounts, action) => {
     const x = Math.ceil(action.x / AreaX);
     const y = Math.ceil(action.y / AreaY);
@@ -46,7 +41,7 @@ export const getPlayerActionCount = (actions: PlayerAction[]) =>
       return replace(actionCounts, index, {
         x,
         y,
-        time: action.time,
+        happenedAt: action.happenedAt,
         fromTeamId: action.fromTeamId,
         count: actionCount.count + 1,
         fromPlayerIds: actionCount.fromPlayerIds.includes(
@@ -61,7 +56,7 @@ export const getPlayerActionCount = (actions: PlayerAction[]) =>
       {
         x,
         y,
-        time: action.time,
+        happenedAt: action.happenedAt,
         fromTeamId: action.fromTeamId,
         count: 1,
         fromPlayerIds: [action.fromPlayerId],

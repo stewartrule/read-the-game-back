@@ -18,7 +18,7 @@ const getShotsInPeriod = (
   stop: number,
 ) =>
   shots.filter(shot => {
-    const time = shot.time.valueOf();
+    const time = shot.happenedAt.valueOf();
     return time >= start && time < stop;
   });
 
@@ -27,7 +27,7 @@ export const getShotCountByPeriod = (
   shots: Shot[],
   numPeriods = 6,
 ): TeamShotCountByPeriod[] => {
-  const gameStart = game.start.valueOf();
+  const gameStart = game.startedAt.valueOf();
   const gameEnd = gameStart + 45 * 60 * 1000;
   const periodDuration = (gameEnd - gameStart) / numPeriods;
 

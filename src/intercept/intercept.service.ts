@@ -28,7 +28,7 @@ export class InterceptService {
     intercept.toPlayerId = toPlayerId;
     intercept.toTeamId = toTeamId;
 
-    intercept.time = new Date();
+    intercept.happenedAt = new Date();
 
     intercept.x = x;
     intercept.y = y;

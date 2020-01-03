@@ -2,11 +2,11 @@ import 'reflect-metadata';
 import {
   Args,
   FieldResolver,
+  Int,
   Query,
   Resolver,
   Root,
   Subscription,
-  Int,
 } from 'type-graphql';
 import {
   filterByType,

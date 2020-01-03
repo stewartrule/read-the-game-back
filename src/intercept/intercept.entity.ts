@@ -8,17 +8,18 @@ import {
 import { Game } from '../game/game.entity';
 import { Player } from '../player/player.entity';
 import { Team } from '../team/team.entity';
+import { PlayerAction } from '../types';
 
-@Entity({ orderBy: { time: 'ASC' } })
+@Entity({ orderBy: { happenedAt: 'ASC' } })
 @ObjectType()
-export class Intercept {
+export class Intercept implements PlayerAction {
   @Field(type => ID)
   @PrimaryGeneratedColumn({ unsigned: true })
   id!: number;
 
   @Field(type => Date)
   @Column()
-  time!: Date;
+  happenedAt!: Date;
 
   @Field(type => Game)
   @ManyToOne(

@@ -25,7 +25,7 @@ export class ShotService {
     shot.fromTeamId = fromTeamId;
     shot.shotTypeId = shotTypeId;
 
-    shot.time = new Date();
+    shot.happenedAt = new Date();
 
     shot.onTarget = hit;
     shot.hit = hit;

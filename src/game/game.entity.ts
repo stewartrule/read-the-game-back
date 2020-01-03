@@ -8,10 +8,11 @@ import {
 } from 'typeorm';
 import { Intercept } from '../intercept/intercept.entity';
 import { Pass } from '../pass/pass.entity';
+import { Position } from '../position/position.entity';
 import { Shot } from '../shot/shot.entity';
 import { Team } from '../team/team.entity';
 
-@Entity({ orderBy: { start: 'DESC' } })
+@Entity({ orderBy: { scheduledAt: 'DESC' } })
 @ObjectType()
 export class Game {
   @Field(type => ID)
@@ -20,15 +21,15 @@ export class Game {
 
   @Field()
   @Column()
-  name!: string;
+  scheduledAt!: Date;
 
   @Field()
   @Column()
-  start!: Date;
+  startedAt!: Date;
 
   @Field()
   @Column()
-  stop!: Date;
+  endedAt!: Date;
 
   @Field(type => Team)
   @ManyToOne(
@@ -81,4 +82,11 @@ export class Game {
     },
   )
   intercepts!: Promise<Intercept[]>;
+
+  @Field(type => [Position])
+  @OneToMany(
+    type => Position,
+    position => position.game,
+  )
+  positions!: Position[];
 }

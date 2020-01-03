@@ -1,4 +1,4 @@
-import { Field, ObjectType, Int } from 'type-graphql';
+import { Field, Int, ObjectType } from 'type-graphql';
 
 @ObjectType()
 export class TeamAreaActionCount {
@@ -12,7 +12,7 @@ export class TeamAreaActionCount {
   count!: number;
 
   @Field()
-  time!: Date;
+  happenedAt!: Date;
 
   @Field()
   fromTeamId!: number;
