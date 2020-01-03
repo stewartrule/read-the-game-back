@@ -55,6 +55,7 @@ export class Shot implements PlayerAction {
     game => game.shots,
     {
       nullable: false,
+      onDelete: 'CASCADE',
     },
   )
   game!: Game;

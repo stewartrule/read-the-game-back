@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import { Query, Resolver } from 'type-graphql';
-import { PositionService } from './player.service';
 import { Position } from './position.entity';
+import { PositionService } from './position.service';
 
 @Resolver(() => Position)
 export class PositionResolver {

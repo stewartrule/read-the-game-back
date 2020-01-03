@@ -25,6 +25,9 @@ export class Intercept implements PlayerAction {
   @ManyToOne(
     type => Game,
     game => game.intercepts,
+    {
+      onDelete: 'CASCADE',
+    },
   )
   game!: Game;
 

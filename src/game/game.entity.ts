@@ -57,9 +57,6 @@ export class Game {
   @OneToMany(
     type => Pass,
     pass => pass.game,
-    {
-      onDelete: 'CASCADE',
-    },
   )
   passes!: Promise<Pass[]>;
 
@@ -67,9 +64,6 @@ export class Game {
   @OneToMany(
     type => Shot,
     shot => shot.game,
-    {
-      onDelete: 'CASCADE',
-    },
   )
   shots!: Promise<Shot[]>;
 
@@ -77,9 +71,6 @@ export class Game {
   @OneToMany(
     type => Intercept,
     intercept => intercept.game,
-    {
-      onDelete: 'CASCADE',
-    },
   )
   intercepts!: Promise<Intercept[]>;
 

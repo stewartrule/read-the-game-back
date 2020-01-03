@@ -36,6 +36,9 @@ export class Pass implements PlayerAction {
   @ManyToOne(
     type => Game,
     game => game.passes,
+    {
+      onDelete: 'CASCADE',
+    },
   )
   game!: Game;
 

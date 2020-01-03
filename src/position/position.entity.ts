@@ -65,6 +65,7 @@ export class Position {
     game => game.positions,
     {
       nullable: false,
+      onDelete: 'CASCADE',
     },
   )
   game!: Game;
