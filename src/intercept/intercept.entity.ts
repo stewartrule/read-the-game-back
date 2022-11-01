@@ -76,10 +76,10 @@ export class Intercept {
   toTeamId!: number;
 
   @Field(type => Int)
-  @Column({ unsigned: true, type: 'tinyint' })
+  @Column({ unsigned: true, type: 'smallint' })
   x!: number;
 
   @Field(type => Int)
-  @Column({ unsigned: true, type: 'tinyint' })
+  @Column({ unsigned: true, type: 'smallint' })
   y!: number;
 }

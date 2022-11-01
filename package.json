@@ -21,6 +21,7 @@
     "graphql-subscriptions": "^1.1.0",
     "graphql-tools": "^4.0.5",
     "mysql": "^2.17.1",
+    "pg": "^8.7.1",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.0",
     "rxjs": "^6.5.3",

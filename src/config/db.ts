@@ -1,11 +1,11 @@
 import { ConnectionOptions } from 'typeorm';
 
 const config: ConnectionOptions = {
-  type: 'mysql',
+  type: 'postgres',
   host: 'localhost',
-  port: 8889,
-  username: 'root',
-  password: 'root',
+  port: 5432,
+  username: 'game',
+  password: 'game',
   database: 'game',
 };
 

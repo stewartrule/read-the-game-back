@@ -29,7 +29,7 @@ export class Player {
   @Field(type => Int)
   @Column({
     unsigned: true,
-    type: 'tinyint',
+    type: 'smallint',
     nullable: false,
   })
   height!: number;
@@ -37,7 +37,7 @@ export class Player {
   @Field(type => Int)
   @Column({
     unsigned: true,
-    type: 'tinyint',
+    type: 'smallint',
     nullable: false,
   })
   strength!: number;
@@ -45,7 +45,7 @@ export class Player {
   @Field(type => Int)
   @Column({
     unsigned: true,
-    type: 'tinyint',
+    type: 'smallint',
     nullable: false,
   })
   balance!: number;
@@ -53,7 +53,7 @@ export class Player {
   @Field(type => Int)
   @Column({
     unsigned: true,
-    type: 'tinyint',
+    type: 'smallint',
     nullable: false,
   })
   stamina!: number;
